@@ -1,0 +1,4197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For Fun i guess - Official Minecraft Modpack</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+    :root {
+      --mc-green: #2a9235;
+      --mc-green-hover: #38b444;
+      --mc-green-light: #52e361;
+      --mc-green-dark: #1a5820;
+
+      --mc-btn: #707070;
+      --mc-btn-hover: #8b8b8b;
+      --mc-btn-light: #aeaeae;
+      --mc-btn-dark: #3b3b3b;
+
+      --mc-gold: #fdb813;
+      --mc-diamond: #4dedf4;
+      --mc-redstone: #ff3b30;
+      --mc-emerald: #17dd62;
+
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-ui: 'VT323', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      image-rendering: pixelated;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    body {
+      background-color: #111116;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(20, 24, 36, 0.45) 0%, rgba(7, 7, 10, 0.94) 100%),
+        url('assets/blocks/bedrock.png');
+      background-repeat: repeat;
+      background-size: 56px 56px;
+      color: #e0e0e0;
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Canvas for Drifting Clouds */
+    #sky-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Classic Minecraft 9-Slice Buttons */
+    .mc-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: clamp(10px, 1.2vw, 14px) clamp(16px, 1.8vw, 24px);
+      background: var(--mc-btn);
+      color: #ffffff;
+      font-family: var(--font-pixel);
+      font-size: clamp(10px, 1vw, 12px);
+      text-decoration: none;
+      cursor: pointer;
+      position: relative;
+      border: none;
+      box-shadow: 
+        inset -3px -3px 0px 0px var(--mc-btn-dark),
+        inset 3px 3px 0px 0px var(--mc-btn-light),
+        0 4px 0 #000000;
+      transition: filter 0.05s, transform 0.05s;
+      text-shadow: 2px 2px 0px #222;
+      user-select: none;
+    }
+
+    .mc-button:hover {
+      background: var(--mc-btn-hover);
+      color: #ffffa0;
+    }
+
+    .mc-button:active {
+      box-shadow: 
+        inset 3px 3px 0px 0px var(--mc-btn-dark),
+        inset -3px -3px 0px 0px var(--mc-btn-light);
+      transform: translateY(2px);
+    }
+
+    .mc-button.green {
+      background: var(--mc-green);
+      box-shadow: 
+        inset -3px -3px 0px 0px var(--mc-green-dark),
+        inset 3px 3px 0px 0px var(--mc-green-light),
+        0 4px 0 #000000;
+      text-shadow: 2px 2px 0px #0e3512;
+    }
+
+    .mc-button.green:hover {
+      background: var(--mc-green-hover);
+      color: #ffffff;
+    }
+
+    .mc-button.green:active {
+      box-shadow: 
+        inset 3px 3px 0px 0px var(--mc-green-dark),
+        inset -3px -3px 0px 0px var(--mc-green-light);
+      transform: translateY(2px);
+    }
+
+    /* Container Frames (Deepslate Tile Paneling) */
+    .mc-panel {
+      background-color: rgba(24, 24, 30, 0.94);
+      background-image: url('assets/blocks/deepslate_tiles.png');
+      background-repeat: repeat;
+      background-size: 64px 64px;
+      background-blend-mode: multiply;
+      border: 4px solid #484856;
+      box-shadow: 
+        inset -4px -4px 0px #121217,
+        inset 4px 4px 0px #676778,
+        0 8px 16px rgba(0, 0, 0, 0.7);
+      padding: clamp(16px, 2.5vw, 32px);
+      position: relative;
+      width: 100%;
+    }
+
+    .mc-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #3c3c4a;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .mc-panel-title {
+      font-size: clamp(13px, 1.4vw, 16px);
+      color: var(--mc-gold);
+      text-shadow: 2px 2px 0px #3f2e00;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mc-panel-title img.header-icon {
+      width: 24px;
+      height: 24px;
+      image-rendering: pixelated;
+    }
+
+    /* Header Nav */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(14, 15, 20, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 4px solid #3a3b47;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+      padding: 12px clamp(16px, 3.5vw, 48px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-badge img {
+      width: 36px;
+      height: 36px;
+      border: 2px solid #57576b;
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .logo-text h1 {
+      font-size: clamp(12px, 1.3vw, 15px);
+      color: #fff;
+      text-shadow: 2px 2px 0 #000;
+      white-space: nowrap;
+    }
+
+    .logo-text span {
+      font-size: 9px;
+      color: var(--mc-gold);
+    }
+
+    nav ul {
+      display: flex;
+      gap: clamp(8px, 1.5vw, 20px);
+      list-style: none;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: #ccc;
+      text-decoration: none;
+      font-size: clamp(10px, 0.9vw, 11px);
+      padding: 6px 12px;
+      border: 1px solid transparent;
+      transition: all 0.1s;
+      white-space: nowrap;
+    }
+
+    nav a:hover {
+      color: #ffffa0;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #555;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .sound-btn {
+      background: #25262e;
+      border: 2px solid #4a4b59;
+      color: #fff;
+      padding: 8px 14px;
+      font-family: var(--font-pixel);
+      font-size: clamp(9px, 0.8vw, 10px);
+      cursor: pointer;
+      box-shadow: 0 2px 0 #000;
+      white-space: nowrap;
+    }
+
+    .sound-btn:hover {
+      background: #363745;
+      color: var(--mc-gold);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      z-index: 10;
+      width: 94%;
+      max-width: 1400px;
+      margin: clamp(20px, 4vh, 45px) auto clamp(30px, 5vh, 60px);
+      padding: 0 clamp(8px, 2vw, 24px);
+      text-align: center;
+    }
+
+    /* 3D Voxel Grass Block */
+    .voxel-container {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 20px;
+      perspective: 600px;
+    }
+
+    .voxel-cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(-22deg) rotateY(45deg);
+      animation: rotateCube 16s infinite linear;
+    }
+
+    @keyframes rotateCube {
+      0% { transform: rotateX(-22deg) rotateY(0deg); }
+      100% { transform: rotateX(-22deg) rotateY(360deg); }
+    }
+
+    .cube-face {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border: 1px solid rgba(0, 0, 0, 0.6);
+      background-size: cover;
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+    }
+
+    .face-top {
+      background-image: url('assets/blocks/grass_block_top_tinted.png');
+      transform: rotateX(90deg) translateZ(50px);
+    }
+
+    .face-bottom {
+      background-image: url('assets/blocks/dirt.png');
+      transform: rotateX(-90deg) translateZ(50px);
+    }
+
+    .face-front {
+      background-image: url('assets/blocks/grass_block_side_composite.png');
+      transform: rotateY(0deg) translateZ(50px);
+    }
+
+    .face-back {
+      background-image: url('assets/blocks/grass_block_side_composite.png');
+      transform: rotateY(180deg) translateZ(50px);
+    }
+
+    .face-right {
+      background-image: url('assets/blocks/grass_block_side_composite.png');
+      transform: rotateY(90deg) translateZ(50px);
+    }
+
+    .face-left {
+      background-image: url('assets/blocks/grass_block_side_composite.png');
+      transform: rotateY(-90deg) translateZ(50px);
+    }
+
+    .splash-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 24px;
+      max-width: 100%;
+    }
+
+    .hero-title {
+      font-size: clamp(22px, 4vw, 42px);
+      color: #ffffff;
+      text-shadow: 4px 4px 0px #1a1a22, 0 8px 24px rgba(0,0,0,0.9);
+      letter-spacing: -1px;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .yellow-splash {
+      position: absolute;
+      right: clamp(-30px, -2vw, -50px);
+      bottom: -18px;
+      color: #ffff00;
+      font-size: clamp(10px, 1.4vw, 13px);
+      text-shadow: 2px 2px 0px #444400;
+      transform: rotate(-12deg);
+      animation: pulseSplash 0.5s infinite alternate ease-in-out;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    @keyframes pulseSplash {
+      from { transform: rotate(-12deg) scale(0.96); }
+      to { transform: rotate(-12deg) scale(1.06); }
+    }
+
+    .hero-subtitle {
+      font-size: clamp(11px, 1.1vw, 13px);
+      color: #b8b8cc;
+      max-width: 950px;
+      margin: 0 auto 30px;
+      line-height: 1.8;
+      text-shadow: 1px 1px 0 #000;
+      padding: 0 10px;
+    }
+
+    .spec-pills {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .spec-pill {
+      background: #171820;
+      border: 2px solid #3d3e4d;
+      padding: 6px 14px;
+      font-size: clamp(9px, 0.85vw, 10px);
+      color: #bbb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+    }
+
+    .spec-pill img {
+      width: 16px;
+      height: 16px;
+      image-rendering: pixelated;
+    }
+
+    .spec-pill strong {
+      color: #fff;
+    }
+
+    .hero-cta {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    /* Main Content Wrapper */
+    .content-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 95%;
+      max-width: 1750px;
+      margin: 0 auto;
+      padding: 0 clamp(8px, 2vw, 24px) 80px;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(32px, 4vw, 54px);
+    }
+
+    /* Tab Controls */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #181922;
+      border: 2px solid #383948;
+      color: #aaa;
+      font-family: var(--font-pixel);
+      font-size: clamp(9px, 0.85vw, 10px);
+      padding: 10px clamp(10px, 1.2vw, 16px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 3px 0 #000;
+      transition: all 0.1s;
+    }
+
+    .tab-btn img {
+      width: 16px;
+      height: 16px;
+      image-rendering: pixelated;
+    }
+
+    .tab-btn:hover {
+      background: #272836;
+      color: #fff;
+      border-color: #55576a;
+    }
+
+    .tab-btn.active {
+      background: var(--mc-green);
+      color: #fff;
+      border-color: var(--mc-green-light);
+      box-shadow: inset 0 -3px 0 var(--mc-green-dark);
+      text-shadow: 1px 1px 0 #0e3512;
+    }
+
+    /* Bestiary Mob Grid */
+    .mob-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: clamp(14px, 1.8vw, 22px);
+    }
+
+    .mob-card {
+      background: rgba(20, 21, 28, 0.95);
+      border: 3px solid #383948;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 0 4px 0 #000;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      transition: transform 0.1s, border-color 0.1s;
+      overflow: hidden;
+    }
+
+    .mob-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--mc-gold);
+    }
+
+    .mob-preview {
+      width: 100%;
+      height: 160px;
+      background-color: #0e0f14;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(45, 47, 60, 0.4) 0%, rgba(10, 10, 15, 0.95) 100%),
+        url('assets/blocks/deepslate.png');
+      background-size: cover, 32px 32px;
+      background-repeat: no-repeat, repeat;
+      border: 2px solid #2b2c39;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .worldgen-preview {
+      width: 100%;
+      height: 160px;
+      background-color: #0e0f14;
+      border: 2px solid #22232d;
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .worldgen-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .mob-card:hover .worldgen-preview img {
+      transform: scale(1.08);
+    }
+
+    .mob-preview img {
+      max-height: 140px;
+      max-width: 92%;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.8));
+      transition: transform 0.2s;
+    }
+
+    .mob-card:hover .mob-preview img {
+      transform: scale(1.06);
+    }
+
+    .mob-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      border-bottom: 2px solid #2d2e3c;
+      padding-bottom: 8px;
+    }
+
+    .mob-name {
+      font-size: clamp(11px, 1vw, 13px);
+      color: #ffffff;
+      text-shadow: 1px 1px 0 #000;
+      line-height: 1.3;
+    }
+
+    .mob-meta {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .hp-badge {
+      font-size: 9px;
+      color: #ff5555;
+      background: transparent;
+      border: none;
+      padding: 0;
+      white-space: nowrap;
+      text-shadow: 1px 1px 0 #000;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-family: var(--font-pixel);
+    }
+
+    .danger-badge {
+      font-size: 9px;
+      padding: 0;
+      background: transparent !important;
+      border: none !important;
+      text-transform: uppercase;
+      font-weight: bold;
+      white-space: nowrap;
+      letter-spacing: 0.5px;
+      text-shadow: 1px 1px 0 #000;
+      font-family: var(--font-pixel);
+    }
+
+    .danger-medium { color: #ffaa00 !important; }
+    .danger-high { color: #ff5555 !important; }
+    .danger-rare { color: #55ffff !important; }
+    .danger-passive { color: #55ff55 !important; }
+    .danger-boss { color: #ff55ff !important; }
+    .danger-low { color: #55ffff !important; }
+
+    .worldgen-card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-bottom: 2px solid #2d2e3c;
+      padding-bottom: 8px;
+    }
+
+    .worldgen-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .worldgen-category {
+      font-size: 8.5px;
+      color: #78a7ff;
+      background: rgba(120, 167, 255, 0.12);
+      border: 1px solid rgba(120, 167, 255, 0.35);
+      border-radius: 2px;
+      padding: 2px 6px;
+      letter-spacing: 0.5px;
+      text-shadow: 1px 1px 0 #000;
+      font-family: var(--font-pixel);
+      display: inline-block;
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .worldgen-dimension {
+      font-size: 8px;
+      color: #c084fc;
+      background: rgba(192, 132, 252, 0.15);
+      border: 1px solid rgba(192, 132, 252, 0.4);
+      border-radius: 2px;
+      padding: 2px 6px;
+      letter-spacing: 0.5px;
+      text-shadow: 1px 1px 0 #000;
+      font-family: var(--font-pixel);
+      display: inline-block;
+    }
+
+    .mob-habitat {
+      font-size: 10px;
+      color: var(--mc-gold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mob-desc {
+      font-size: 10px;
+      color: #aaaabb;
+      line-height: 1.5;
+      min-height: 48px;
+    }
+
+    /* Command Copy Box */
+    .command-box {
+      background: #090a0e;
+      border: 2px dashed #444558;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: all;
+      transition: background 0.1s, border-color 0.1s;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: auto;
+      overflow: hidden;
+    }
+
+    .command-box:hover {
+      background: #141622;
+      border-color: var(--mc-diamond);
+    }
+
+    .command-prompt {
+      color: #555566;
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .command-text {
+      color: var(--mc-diamond);
+      font-family: 'VT323', monospace;
+      font-size: 15px;
+      line-height: 1.2;
+      flex: 1;
+      min-width: 0;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+      letter-spacing: 0.5px;
+    }
+
+    .command-copy-btn {
+      background: #1c1d28;
+      border: 1px solid #3c3d52;
+      color: #9999aa;
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      padding: 4px 6px;
+      flex-shrink: 0;
+      user-select: none;
+      transition: all 0.1s;
+      box-shadow: 0 1px 0 #000;
+    }
+
+    .command-box:hover .command-copy-btn {
+      background: var(--mc-green);
+      color: #ffffff;
+      border-color: var(--mc-green-light);
+      box-shadow: inset 0 -1px 0 var(--mc-green-dark);
+    }
+
+    /* Biome / Worldgen Gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: clamp(14px, 1.8vw, 22px);
+    }
+
+    .gallery-card {
+      background: #14151c;
+      border: 3px solid #383948;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 0 #000;
+    }
+
+    .gallery-card img {
+      width: 100%;
+      height: clamp(180px, 20vw, 240px);
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-card:hover img {
+      transform: scale(1.04);
+    }
+
+    .gallery-info {
+      padding: 16px;
+      background: rgba(14, 15, 20, 0.95);
+      border-top: 2px solid #2d2e3c;
+    }
+
+    .gallery-info h4 {
+      font-size: clamp(11px, 1vw, 13px);
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .gallery-info p {
+      font-size: 10px;
+      color: #9999aa;
+      line-height: 1.5;
+    }
+
+    /* Searchable Mod Index */
+    .mod-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .mod-search-input {
+      flex: 1;
+      background: #101117;
+      border: 2px solid #3c3d4f;
+      color: #fff;
+      font-family: var(--font-pixel);
+      font-size: clamp(10px, 0.9vw, 11px);
+      padding: 12px 16px;
+      outline: none;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+    }
+
+    .mod-search-input:focus {
+      border-color: var(--mc-gold);
+    }
+
+    .mod-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: clamp(10px, 1.4vw, 16px);
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .mod-list-grid::-webkit-scrollbar {
+      width: 10px;
+      background: #12131a;
+    }
+    .mod-list-grid::-webkit-scrollbar-thumb {
+      background: #444557;
+      border: 2px solid #12131a;
+    }
+
+    .mod-item {
+      background: #15161e;
+      border: 2px solid #2d2e3c;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 2px 0 #000;
+    }
+
+    .mod-item-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mod-icon-frame {
+      width: 32px;
+      height: 32px;
+      background: #0d0e12;
+      border: 2px solid #3c3d4f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 4px #000;
+      flex-shrink: 0;
+    }
+
+    .mod-icon-frame img {
+      width: 24px;
+      height: 24px;
+      image-rendering: pixelated;
+    }
+
+    .mod-item-name {
+      font-size: 11px;
+      color: #fff;
+    }
+
+    .mod-item-author {
+      font-size: 9px;
+      color: #888899;
+    }
+
+    .mod-item-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mod-item-link {
+      font-size: 8px;
+      text-decoration: underline;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: color 0.15s ease;
+      font-family: var(--font-pixel);
+      letter-spacing: 0.5px;
+    }
+
+    .mod-item-link.source-link {
+      color: #ffaa00;
+    }
+
+    .mod-item-link.source-link:hover {
+      color: #ffffff;
+      text-shadow: 0 0 4px #ffaa00;
+    }
+
+    .mod-item-link.wiki-link {
+      color: #55ff55;
+    }
+
+    .mod-item-link.wiki-link:hover {
+      color: #ffffff;
+      text-shadow: 0 0 4px #55ff55;
+    }
+
+    .mod-item-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Installation Steps */
+    .install-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: clamp(14px, 1.8vw, 22px);
+    }
+
+    .install-card {
+      background: #13141b;
+      border: 2px solid #353645;
+      padding: clamp(16px, 2vw, 24px);
+      box-shadow: 0 4px 0 #000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .install-step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--mc-green);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      box-shadow: inset -2px -2px 0 var(--mc-green-dark), inset 2px 2px 0 var(--mc-green-light);
+    }
+
+    .install-card h3 {
+      font-size: clamp(12px, 1vw, 13px);
+      color: #fff;
+    }
+
+    .install-card p {
+      font-size: 10px;
+      color: #9999aa;
+      line-height: 1.6;
+    }
+
+    /* Floating Toast */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111218;
+      border: 3px solid var(--mc-gold);
+      padding: 12px 24px;
+      color: #ffffa0;
+      font-size: 11px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      gap: 12px;
+      z-index: 1000;
+      animation: popToast 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    @keyframes popToast {
+      from { transform: translateX(-50%) translateY(20px) scale(0.9); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* Footer */
+    footer {
+      background: #09090d;
+      border-top: 4px solid #2b2c37;
+      padding: 30px 20px;
+      text-align: center;
+      font-size: 10px;
+      color: #666677;
+      width: 100%;
+    }
+
+    footer a {
+      color: var(--mc-gold);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 960px) {
+      header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+        padding: 14px 20px;
+      }
+      nav ul {
+        justify-content: center;
+      }
+      .header-actions {
+        justify-content: center;
+      }
+      .yellow-splash {
+        position: static;
+        display: block;
+        transform: rotate(-3deg);
+        margin-top: 8px;
+      }
+      .content-wrapper {
+        width: 98%;
+        padding: 0 10px 60px;
+      }
+      .hero {
+        width: 98%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero-title {
+        font-size: 20px;
+      }
+      .mc-panel {
+        padding: 14px 10px;
+      }
+      .tab-bar {
+        justify-content: center;
+      }
+      .tab-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .hero-cta {
+        flex-direction: column;
+      }
+      .hero-cta .mc-button {
+        width: 100%;
+      }
+      .spec-pills {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Canvas for Clouds -->
+  <canvas id="sky-canvas"></canvas>
+
+  <!-- Sticky Header -->
+  <header>
+    <a href="#" class="logo-badge" onclick="playSound('click')">
+      <img src="assets/blocks/crafting_table_top.png" alt="Crafting Table">
+      <div class="logo-text">
+        <h1>FOR FUN I GUESS</h1>
+        <span>FABRIC 1.21.4</span>
+      </div>
+    </a>
+
+    <nav>
+      <ul>
+        <li><a href="#bestiary" onclick="playSound('click')">Bestiary</a></li>
+        <li><a href="#worldgen" onclick="playSound('click')">Worldgen</a></li>
+        <li><a href="#mods" onclick="playSound('click')">Mod Index</a></li>
+        <li><a href="#install" onclick="playSound('click')">Install</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <button class="sound-btn" id="sound-toggle" onclick="toggleSound()">🔊 Sound: ON</button>
+      <a href="https://modrinth.com/modpack/for-fun-i-guess" target="_blank" class="mc-button green" style="padding: 8px 16px; font-size: 10px;" onclick="playSound('exp')">
+        <img src="assets/items/totem_of_undying.png" style="width: 14px; height: 14px;" alt="Totem">
+        GET ON MODRINTH
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <!-- 3D Voxel Grass Block -->
+    <div class="voxel-container">
+      <div class="voxel-cube">
+        <div class="cube-face face-front"></div>
+        <div class="cube-face face-back"></div>
+        <div class="cube-face face-right"></div>
+        <div class="cube-face face-left"></div>
+        <div class="cube-face face-top"></div>
+        <div class="cube-face face-bottom"></div>
+      </div>
+    </div>
+
+    <div class="splash-container">
+      <h2 class="hero-title">FOR FUN I GUESS</h2>
+      <div class="yellow-splash" id="random-splash">Now with all approved mob renders!</div>
+    </div>
+
+    <p class="hero-subtitle">
+      A handcrafted Fabric 1.21.4 exploration and survival modpack. Featuring immersive Terralith & Biomes O' Plenty landscapes, 
+      overhauled creature ecologies, culinary adventures with Farmer's Delight, and butter-smooth performance backed by Sodium & Nvidium.
+    </p>
+
+    <div class="spec-pills">
+      <div class="spec-pill">
+        <img src="assets/blocks/grass_block_top_tinted.png" alt="Grass">
+        GAME: <strong>Minecraft 1.21.4 (26.3)</strong>
+      </div>
+      <div class="spec-pill">
+        <img src="assets/items/trial_key.png" alt="Key">
+        LOADER: <strong>Fabric</strong>
+      </div>
+      <div class="spec-pill">
+        <img src="assets/blocks/bookshelf.png" alt="Books">
+        CONTENT: <strong>119 Curated Mods</strong>
+      </div>
+      <div class="spec-pill">
+        <img src="assets/items/diamond_sword.png" alt="Sword">
+        STATUS: <strong>Under Review on Modrinth</strong>
+      </div>
+    </div>
+
+    <div class="hero-cta">
+      <a href="https://modrinth.com/modpack/for-fun-i-guess" target="_blank" class="mc-button green" onclick="playSound('exp')">
+        <img src="assets/items/totem_of_undying.png" style="width: 16px; height: 16px;" alt="Totem">
+        DOWNLOAD ON MODRINTH
+      </a>
+      <a href="#bestiary" class="mc-button" onclick="playSound('click')">
+        <img src="assets/items/spyglass.png" style="width: 16px; height: 16px;" alt="Spyglass">
+        EXPLORE BESTIARY
+      </a>
+      <a href="https://ko-fi.com/monobaka" target="_blank" class="mc-button" onclick="playSound('click')" style="border-color: #ff5e5b; color: #ff8583; display: inline-flex; align-items: center; gap: 6px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle;"><path d="M23.881 8.948c-.02-.137-.107-.258-.236-.324a1.867 1.867 0 0 0-.877-.215H4.15a1.86 1.86 0 0 0-.882.219c-.13.067-.218.19-.236.33L1.517 18.06A2.25 2.25 0 0 0 3.743 20.6h16.514a2.25 2.25 0 0 0 2.226-2.54l-1.515-9.112h2.913a2.25 2.25 0 0 0 2.25-2.25v-.31a2.25 2.25 0 0 0-2.25-2.25h-.548a.25.25 0 0 1-.25-.25v-.5a.25.25 0 0 1 .25-.25h.548A3.75 3.75 0 0 1 27.63 7.14v.31a3.75 3.75 0 0 1-3.75 3.75h-2.188l-.348 2.09A3.75 3.75 0 0 1 17.65 16.5H6.35a3.75 3.75 0 0 1-3.694-3.21L1.037 3.5h21.926l.918 5.448z"/></svg>
+        KO-FI
+      </a>
+      <a href="https://www.patreon.com/c/MONOBAKA" target="_blank" class="mc-button" onclick="playSound('click')" style="border-color: #f96854; color: #ff8b7a; display: inline-flex; align-items: center; gap: 6px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle;"><path d="M14.82 2.41a7.79 7.79 0 0 0-7.79 7.79 7.79 7.79 0 0 0 7.79 7.79 7.79 7.79 0 0 0 7.79-7.79 7.79 7.79 0 0 0-7.79-7.79zm-12.41 0v19.18h3.89V2.41H2.41z"/></svg>
+        PATREON
+      </a>
+    </div>
+  </section>
+
+  <!-- Content Container -->
+  <main class="content-wrapper">
+
+    <!-- Interactive Bestiary with 7 Complete Categories -->
+    <section id="bestiary" class="mc-panel">
+      <div class="mc-panel-header">
+        <div class="mc-panel-title">
+          <img src="assets/blocks/ancient_debris_side.png" class="header-icon" alt="Debris">
+          WILDLIFE & MOB BESTIARY (75 NEW CREATURES & RESIDENTS)
+        </div>
+        <span style="font-size: 10px; color: #888899;">Click any command box to copy command</span>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="filterMobs('creepers', this)">
+          <img src="assets/icons/creeper-overhaul.png" alt="Creeper">
+          CREEPERS (15)
+        </button>
+        <button class="tab-btn" onclick="filterMobs('endermen', this)">
+          <img src="assets/icons/enderman-overhaul.png" alt="Enderman">
+          ENDERMEN (19)
+        </button>
+        <button class="tab-btn" onclick="filterMobs('spiders', this)">
+          <img src="assets/icons/spider-overhaul.png" alt="Spider">
+          SPIDERS (16)
+        </button>
+        <button class="tab-btn" onclick="filterMobs('friends', this)">
+          <img src="assets/icons/friends-and-foes.png" alt="Friends">
+          FRIENDS & FOES (11)
+        </button>
+        <button class="tab-btn" onclick="filterMobs('apple_cows', this)">
+          <img src="assets/items/fd_tomato.png" alt="Apple Cow">
+          APPLE COWS (3)
+        </button>
+        <button class="tab-btn" onclick="filterMobs('critters', this)">
+          <img src="assets/items/heart_of_the_sea.png" alt="Critters">
+          WILDLIFE & CRITTERS (4)
+        </button>
+        <button class="tab-btn" onclick="filterMobs('villagers', this)">
+          <img src="assets/blocks/crafting_table_top.png" alt="Villagers">
+          FRONTIER SETTLERS (7)
+        </button>
+      </div>
+
+      <div class="mob-grid" id="mob-cards-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- World Generation & Structures Explorer -->
+    <section id="worldgen" class="mc-panel">
+      <div class="mc-panel-header">
+        <div class="mc-panel-title">
+          <img src="assets/items/compass_16.png" class="header-icon" alt="Compass">
+          WORLD GENERATION & STRUCTURES
+        </div>
+        <span style="font-size: 10px; color: #888899;">163 Biomes & 27 Custom Structures & Settlements</span>
+      </div>
+
+      <!-- Worldgen Tabs & Search -->
+      <div class="worldgen-controls" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; align-items: center;">
+        <div class="category-tabs" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 0;">
+          <button class="tab-btn active" id="tab-btn-tbiomes" onclick="switchWorldgenTab('terralith_biomes', this)">
+            <img src="assets/icons/terralith.png" alt="Terralith">
+            TERRALITH BIOMES (95)
+          </button>
+          <button class="tab-btn" id="tab-btn-tstructs" onclick="switchWorldgenTab('terralith_structures', this)">
+            <img src="assets/blocks/deepslate_tiles.png" alt="Structures">
+            TERRALITH STRUCTURES (11)
+          </button>
+          <button class="tab-btn" id="tab-btn-bopbiomes" onclick="switchWorldgenTab('bop_biomes', this)">
+            <img src="assets/icons/biomes-o-plenty.png" alt="BOP">
+            BIOMES O' PLENTY (68)
+          </button>
+          <button class="tab-btn" id="tab-btn-overworldstructs" onclick="switchWorldgenTab('overworld_structures', this)">
+            <img src="assets/blocks/cobblestone.png" alt="Overworld Structures">
+            OVERWORLD STRUCTURES (16)
+          </button>
+        </div>
+        <div style="flex: 1; min-width: 260px;">
+          <input type="text" id="worldgen-search" class="mod-search-input" placeholder="Search biomes & structures (e.g. Caldera, Mage, Bayou, End)..." oninput="filterWorldgen()">
+        </div>
+      </div>
+
+      <div class="mob-grid" id="worldgen-cards-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- Searchable Mod Index -->
+    <section id="mods" class="mc-panel">
+      <div class="mc-panel-header">
+        <div class="mc-panel-title">
+          <img src="assets/blocks/bookshelf.png" class="header-icon" alt="Bookshelf">
+          MOD INDEX DIRECTORY (119 MODS)
+        </div>
+        <span style="font-size: 10px; color: #888899;">Live Instant Search</span>
+      </div>
+
+      <div class="mod-controls">
+        <input type="text" id="mod-search" class="mod-search-input" placeholder="Search mods by name or author (e.g. Sodium, Terralith, Fabric)..." oninput="filterModList()">
+      </div>
+
+      <div class="mod-list-grid" id="mod-list-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- Installation Steps -->
+    <section id="install" class="mc-panel">
+      <div class="mc-panel-header">
+        <div class="mc-panel-title">
+          <img src="assets/blocks/crafting_table_top.png" class="header-icon" alt="Crafting">
+          HOW TO INSTALL & PLAY
+        </div>
+      </div>
+
+      <div class="install-grid">
+        <div class="install-card">
+          <div class="install-step-num">1</div>
+          <h3>Modrinth App (Easiest)</h3>
+          <p>Open the Modrinth App, search for <strong>"For Fun i guess"</strong>, and hit <strong>Install</strong>. All 109 mods and configurations download automatically.</p>
+        </div>
+
+        <div class="install-card">
+          <div class="install-step-num">2</div>
+          <h3>Prism Launcher</h3>
+          <p>Click <strong>Add Instance</strong> &rarr; <strong>Modrinth</strong> &rarr; search <strong>"For Fun i guess"</strong>. Or drag the <code>For_Fun_Modpack.mrpack</code> file directly into Prism.</p>
+        </div>
+
+        <div class="install-card">
+          <div class="install-step-num">3</div>
+          <h3>Manual Installation</h3>
+          <p>Install Fabric Loader 0.16.10+ for Minecraft 1.21.4, extract <code>For_Fun_Modpack_Direct_Share.zip</code> into your <code>.minecraft</code> folder, and allocate 4–6 GB RAM.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast">
+    <img src="assets/items/totem_of_undying.png" style="width: 18px; height: 18px;" alt="Totem">
+    <span id="toast-msg">Copied command!</span>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap;">
+      <a href="https://ko-fi.com/monobaka" target="_blank" style="color: #ff7f7d; text-decoration: none; font-size: 11px; display: inline-flex; align-items: center; gap: 5px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.881 8.948c-.02-.137-.107-.258-.236-.324a1.867 1.867 0 0 0-.877-.215H4.15a1.86 1.86 0 0 0-.882.219c-.13.067-.218.19-.236.33L1.517 18.06A2.25 2.25 0 0 0 3.743 20.6h16.514a2.25 2.25 0 0 0 2.226-2.54l-1.515-9.112h2.913a2.25 2.25 0 0 0 2.25-2.25v-.31a2.25 2.25 0 0 0-2.25-2.25h-.548a.25.25 0 0 1-.25-.25v-.5a.25.25 0 0 1 .25-.25h.548A3.75 3.75 0 0 1 27.63 7.14v.31a3.75 3.75 0 0 1-3.75 3.75h-2.188l-.348 2.09A3.75 3.75 0 0 1 17.65 16.5H6.35a3.75 3.75 0 0 1-3.694-3.21L1.037 3.5h21.926l.918 5.448z"/></svg>
+        Support on Ko-fi
+      </a>
+      <span style="color: #444;">&bull;</span>
+      <a href="https://www.patreon.com/c/MONOBAKA" target="_blank" style="color: #ff9d85; text-decoration: none; font-size: 11px; display: inline-flex; align-items: center; gap: 5px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M14.82 2.41a7.79 7.79 0 0 0-7.79 7.79 7.79 7.79 0 0 0 7.79 7.79 7.79 7.79 0 0 0 7.79-7.79 7.79 7.79 0 0 0-7.79-7.79zm-12.41 0v19.18h3.89V2.41H2.41z"/></svg>
+        Join the Patreon
+      </a>
+      <span style="color: #444;">&bull;</span>
+      <a href="https://modrinth.com/modpack/for-fun-i-guess" target="_blank" style="color: #00af5c; text-decoration: none; font-size: 11px;">📦 Modrinth Page</a>
+    </div>
+    <p>Modpack & website created by <strong>MONO_BAKA</strong> &bull; Built for Minecraft Fabric 1.21.4</p>
+    <p style="margin-top: 6px;">
+      All mod rights, textures, and assets belong to their respective creators. Not an official Minecraft product. Not approved by or associated with Mojang.
+    </p>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    /* Procedural Web Audio API Synthesizer */
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('sound-toggle');
+      btn.innerText = soundEnabled ? '🔊 Sound: ON' : '🔈 Sound: OFF';
+      if (soundEnabled) playSound('click');
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      const now = audioCtx.currentTime;
+
+      if (type === 'click') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.04);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.04);
+      } else if (type === 'exp') {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+          gain.gain.setValueAtTime(0.18, now + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.12);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.06);
+          osc.stop(now + idx * 0.06 + 0.12);
+        });
+      }
+    }
+
+    /* Clipboard Copy & Toast */
+    function copyCommand(text) {
+      playSound('exp');
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("✨ Copied: " + text);
+      }).catch(() => {
+        showToast("Copied: " + text);
+      });
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      msg.innerText = text;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+
+    /* Injected Approved Mobs Data */
+    const mobsData = {
+  "creepers": [
+    {
+      "name": "Badlands Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Badlands & Mesa Canyons",
+      "desc": "Hardened terracotta shell topped with a shearable cactus hat. Sprays sharp clay shards upon detonation.",
+      "cmd": "/summon creeperoverhaul:badlands_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_badlands.webp"
+    },
+    {
+      "name": "Bamboo Creeper",
+      "hp": "20 HP",
+      "danger": "high",
+      "habitat": "Dense Bamboo Jungles",
+      "desc": "Tall, slender stalk that stands completely still between bamboo shoots. Flees when near Pandas!",
+      "cmd": "/summon creeperoverhaul:bamboo_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_bamboo.webp"
+    },
+    {
+      "name": "Beach Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Sandy Shores & Coasts",
+      "desc": "Adorned with sea shells and fast in shallow water. Bursts into a cloud of sea foam if splashed with water.",
+      "cmd": "/summon creeperoverhaul:beach_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_beach.webp"
+    },
+    {
+      "name": "Cave Creeper",
+      "hp": "24 HP",
+      "danger": "high",
+      "habitat": "Deep Underground (Y <= 50)",
+      "desc": "Plated in deepslate and cobblestone. Silent stalker with a 20% faster fuse timer. Confined to caves.",
+      "cmd": "/summon creeperoverhaul:cave_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_cave.webp"
+    },
+    {
+      "name": "Dark Oak Creeper",
+      "hp": "22 HP",
+      "danger": "high",
+      "habitat": "Dark Forest Canopies",
+      "desc": "Camouflaged in dark bark and mushroom caps. Releases a blinding spore cloud upon exploding.",
+      "cmd": "/summon creeperoverhaul:dark_oak_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_dark_oak.webp"
+    },
+    {
+      "name": "Desert Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Deserts & Sand Dunes",
+      "desc": "Sandstone shell topped with desert flora. Camouflaged against sandy cliffs and immune to cactus damage.",
+      "cmd": "/summon creeperoverhaul:desert_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_desert.webp"
+    },
+    {
+      "name": "Dripstone Creeper",
+      "hp": "22 HP",
+      "danger": "high",
+      "habitat": "Dripstone Caverns",
+      "desc": "Stalactite head horn. Shakes the cavern ceiling causing pointed dripstone to rain down on nearby players.",
+      "cmd": "/summon creeperoverhaul:dripstone_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_dripstone.webp"
+    },
+    {
+      "name": "Hills Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Mountain Peaks & Slopes",
+      "desc": "Adapted to steep mountain crags. Its explosion packs amplified horizontal knockback to throw miners off cliffs.",
+      "cmd": "/summon creeperoverhaul:hills_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_hills.webp"
+    },
+    {
+      "name": "Jungle Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Tropical Rainforests",
+      "desc": "Shrouded in dense vines that muffle its hissing fuse. Drops vines, cocoa beans, and gunpowder.",
+      "cmd": "/summon creeperoverhaul:jungle_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_jungle.webp"
+    },
+    {
+      "name": "Mushroom Creeper",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Mushroom Fields",
+      "desc": "Completely peaceful fungal creature! Does not explode. Can be sheared for mushrooms or fed fungus.",
+      "cmd": "/summon creeperoverhaul:mushroom_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_mushroom.webp"
+    },
+    {
+      "name": "Ocean Creeper",
+      "hp": "22 HP",
+      "danger": "medium",
+      "habitat": "Deep Oceans & Reefs",
+      "desc": "Swims rapidly using aquatic fins. Submerged blast creates a suction whirlpool pulling swimmers inward.",
+      "cmd": "/summon creeperoverhaul:ocean_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_ocean.webp"
+    },
+    {
+      "name": "Savanna Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Acacia Savannas",
+      "desc": "Tall, weathered wooden totem model. High sprint speed across golden grasslands.",
+      "cmd": "/summon creeperoverhaul:savannah_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_savannah.webp"
+    },
+    {
+      "name": "Snowy Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Snowy Plains & Glaciers",
+      "desc": "Fur-coated icy body. Neutral towards players unless attacked; actively hunts Strays and Skeletons!",
+      "cmd": "/summon creeperoverhaul:snowy_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_snowy.webp"
+    },
+    {
+      "name": "Spruce Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Taiga & Old Growth Pine",
+      "desc": "Compact pinecone shell. Sturdy exterior gives it high resistance against arrow knockback.",
+      "cmd": "/summon creeperoverhaul:spruce_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_spruce.webp"
+    },
+    {
+      "name": "Swamp Creeper",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Swamps & Mangroves",
+      "desc": "Wears a mud skull mask. Floats effortlessly on water like a lily pad to surprise boaters.",
+      "cmd": "/summon creeperoverhaul:swamp_creeper ~ ~ ~",
+      "img": "assets/mobs/creeper_swamp.webp"
+    }
+  ],
+  "endermen": [
+    {
+      "name": "Badlands Enderman",
+      "hp": "40 HP",
+      "danger": "high",
+      "habitat": "Terracotta Badlands",
+      "desc": "Swirls with red dust. Whips up a blinding sandstorm when provoked. Drops Sandstorm Pearls.",
+      "cmd": "/summon endermanoverhaul:badlands_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_badlands.webp"
+    },
+    {
+      "name": "Cave Enderman",
+      "hp": "45 HP",
+      "danger": "high",
+      "habitat": "Deep Caverns (Y <= 0)",
+      "desc": "Hunched stalker that crawls along lightless cave ceilings without making idle noises. Drops Cave Pearls.",
+      "cmd": "/summon endermanoverhaul:cave_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_cave.webp"
+    },
+    {
+      "name": "Dark Oak Enderman",
+      "hp": "50 HP",
+      "danger": "high",
+      "habitat": "Dark Forest",
+      "desc": "Towering illager-hunter enderman that wields raw brute force. Drops Corrupted Shield Fragments.",
+      "cmd": "/summon endermanoverhaul:dark_oak_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_dark_oak.webp"
+    },
+    {
+      "name": "Desert Enderman",
+      "hp": "40 HP",
+      "danger": "medium",
+      "habitat": "Sandy Deserts",
+      "desc": "Sun-bleached mummy bandages. Creates mirage duplicates of itself when damaged. Drops Desert Pearls.",
+      "cmd": "/summon endermanoverhaul:desert_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_desert.webp"
+    },
+    {
+      "name": "Flower Fields Enderman",
+      "hp": "30 HP",
+      "danger": "passive",
+      "habitat": "Meadows & Petal Groves",
+      "desc": "Gentle blossom-bearing giant. Peaceful even when stared at. Drops Flower Pearls that grow flora.",
+      "cmd": "/summon endermanoverhaul:flower_fields_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_flower_fields.webp"
+    },
+    {
+      "name": "Ice Spikes Enderman",
+      "hp": "40 HP",
+      "danger": "high",
+      "habitat": "Glaciers & Ice Spikes",
+      "desc": "Clad in translucent icicles. Strikes inflict freezing frostbite. Drops Icy Pearls that freeze water.",
+      "cmd": "/summon endermanoverhaul:ice_spikes_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_ice_spikes.webp"
+    },
+    {
+      "name": "Mushroom Enderman",
+      "hp": "40 HP",
+      "danger": "medium",
+      "habitat": "Mushroom Fields",
+      "desc": "Sprouts fungal caps. Releases a soothing spore trail that cures poison and hunger. Drops Mushroom Pearls.",
+      "cmd": "/summon endermanoverhaul:mushroom_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_mushroom.webp"
+    },
+    {
+      "name": "Ocean Enderman",
+      "hp": "40 HP",
+      "danger": "rare",
+      "habitat": "Deep Seas & Coral Reefs",
+      "desc": "Immune to water damage! Dwells along the seabed with glowing coral. Drops Bubble Pearls.",
+      "cmd": "/summon endermanoverhaul:ocean_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_ocean.webp"
+    },
+    {
+      "name": "Savanna Enderman",
+      "hp": "40 HP",
+      "danger": "medium",
+      "habitat": "Savanna Plateaus",
+      "desc": "Roams in packs across golden acacia grasslands. Drops Savanna Pearls that grant Speed II.",
+      "cmd": "/summon endermanoverhaul:savanna_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_savanna.webp"
+    },
+    {
+      "name": "Snowy Enderman",
+      "hp": "40 HP",
+      "danger": "medium",
+      "habitat": "Snowy Slopes & Taigas",
+      "desc": "Thick white fur coat. Immune to powder snow freezing. Drops Snowy Pearls that summon powder snow.",
+      "cmd": "/summon endermanoverhaul:snowy_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_snowy.webp"
+    },
+    {
+      "name": "Swamp Enderman",
+      "hp": "40 HP",
+      "danger": "medium",
+      "habitat": "Swamps & Mangroves",
+      "desc": "Dripping moss and mangrove slime. Spits blinding swamp mud when attacked. Drops Swamp Pearls.",
+      "cmd": "/summon endermanoverhaul:swamp_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_swamp.webp"
+    },
+    {
+      "name": "Windswept Hills Enderman",
+      "hp": "40 HP",
+      "danger": "high",
+      "habitat": "Terralith Mountain Peaks",
+      "desc": "Harnesses high-altitude gusts to glide between peaks. Drops Wind Pearls that grant Slow Falling.",
+      "cmd": "/summon endermanoverhaul:windswept_hills_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_windswept_hills.webp"
+    },
+    {
+      "name": "Nether Wastes Enderman",
+      "hp": "45 HP",
+      "danger": "high",
+      "habitat": "The Nether (Wastes)",
+      "desc": "Searing obsidian body immune to fire. Attacks piglins on sight. Drops Nether Pearls for Fire Resistance.",
+      "cmd": "/summon endermanoverhaul:nether_wastes_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_nether_wastes.webp"
+    },
+    {
+      "name": "Crimson Enderman",
+      "hp": "45 HP",
+      "danger": "high",
+      "habitat": "The Nether (Crimson Forest)",
+      "desc": "Weeping crimson vines and fungal spores. Aggressive towards Hoglins. Drops Crimson Strength Pearls.",
+      "cmd": "/summon endermanoverhaul:crimson_forest_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_crimson.webp"
+    },
+    {
+      "name": "Warped Enderman",
+      "hp": "45 HP",
+      "danger": "high",
+      "habitat": "The Nether (Warped Forest)",
+      "desc": "Cyan eyes and warped fungus tentacles. Drops Warped Pearls that never spawn Endermites.",
+      "cmd": "/summon endermanoverhaul:warped_forest_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_warped.webp"
+    },
+    {
+      "name": "Soulsand Enderman",
+      "hp": "50 HP",
+      "danger": "high",
+      "habitat": "Soul Sand Valley",
+      "desc": "Soul fire radiates from its ribcage. Inflicts Soul Fire burn. Drops Soul Pearls that terrify Ghasts.",
+      "cmd": "/summon endermanoverhaul:soulsand_valley_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_soulsand_valley.webp"
+    },
+    {
+      "name": "End Enderman",
+      "hp": "40 HP",
+      "danger": "high",
+      "habitat": "Central End Island",
+      "desc": "Ancient guardian of the dragon island. Resistant to dragon breath. Drops classic Ender Pearls.",
+      "cmd": "/summon endermanoverhaul:end_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_end.webp"
+    },
+    {
+      "name": "End Islands Enderman",
+      "hp": "45 HP",
+      "danger": "high",
+      "habitat": "Outer End Islands",
+      "desc": "Infused with purple chorus flower pollen. Teleports across void drops without taking fall damage.",
+      "cmd": "/summon endermanoverhaul:end_islands_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_end_islands.webp"
+    },
+    {
+      "name": "Pet Enderman",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Tamed Companion",
+      "desc": "Loyal mini-enderman companion! Follows you, retrieves items, and teleports into battle to defend you.",
+      "cmd": "/summon endermanoverhaul:pet_enderman ~ ~ ~",
+      "img": "assets/mobs/enderman_pets.webp"
+    }
+  ],
+  "spiders": [
+    {
+      "name": "Birch Spider",
+      "hp": "16 HP",
+      "danger": "medium",
+      "habitat": "Birch Forests & Nests",
+      "desc": "Camouflages in fallen hollow birch logs. When disturbed, swarms out in packs of 2-3 to defend its nest.",
+      "cmd": "/summon spider-overhaul:birch_spider ~ ~ ~",
+      "img": "assets/mobs/spider_overhaul_shot_1.jpg"
+    },
+    {
+      "name": "Desert Spider",
+      "hp": "16 HP",
+      "danger": "medium",
+      "habitat": "Deserts & Dunes",
+      "desc": "Prickly cactus body. Shoots sharp cactus spines at range and releases a burst of spines upon death!",
+      "cmd": "/summon spider-overhaul:desert_spider ~ ~ ~",
+      "img": "assets/mobs/spider_overhaul_shot_2.jpg"
+    },
+    {
+      "name": "Swamp Spider",
+      "hp": "18 HP",
+      "danger": "medium",
+      "habitat": "Swamps & Mangroves",
+      "desc": "A strong aquatic swimmer that camouflages underneath Infested Lily Pads. Inflicts the Bogging effect on hit.",
+      "cmd": "/summon spider-overhaul:swamp_spider ~ ~ ~",
+      "img": "assets/mobs/spider_overhaul_shot_3.jpg"
+    },
+    {
+      "name": "Diamond Cavern Spider",
+      "hp": "22 HP",
+      "danger": "high",
+      "habitat": "Deep Underground Caves (#c:is_cave)",
+      "desc": "Carries precious diamond clusters embedded in its stone carapace. Emits glowing teal eyes and shoots web traps.",
+      "cmd": "/summon spider-overhaul:cavern_spider ~ ~ ~",
+      "img": "assets/mobs/spider_overhaul_shot_4.jpg"
+    },
+    {
+      "name": "Emerald Cavern Spider",
+      "hp": "22 HP",
+      "danger": "high",
+      "habitat": "Mountain Caves & Emerald Veins",
+      "desc": "Glittering emerald geode carapace. Binds trespassers in heavy silk nets causing the Webbed status effect.",
+      "cmd": "/summon spider-overhaul:cavern_spider ~ ~ ~",
+      "img": "assets/mobs/spider_combat_modrinth.png"
+    },
+    {
+      "name": "Amethyst Cavern Spider",
+      "hp": "22 HP",
+      "danger": "high",
+      "habitat": "Amethyst Geodes & Deep Caves",
+      "desc": "Vibrant purple amethyst cluster carapace. Resonates with harmonic crystal chimes when taking damage in deep caverns.",
+      "cmd": "/summon spider-overhaul:cavern_spider ~ ~ ~",
+      "img": "assets/mobs/spider_cavern_amethyst.png"
+    },
+    {
+      "name": "Jungle Spider",
+      "hp": "16 HP",
+      "danger": "high",
+      "habitat": "Jungle Canopies & Vines",
+      "desc": "Agile tree climber with venomous fangs. Drops Spider Pollen which can be bottled to fertilize Giant Bamboo Blocks.",
+      "cmd": "/summon spider-overhaul:jungle_spider ~ ~ ~",
+      "img": "assets/mobs/spider_overhaul_shot_5.jpg"
+    },
+    {
+      "name": "Ice Spider",
+      "hp": "18 HP",
+      "danger": "medium",
+      "habitat": "Glaciers & Ice Spikes",
+      "desc": "Translucent frozen chitin. Injects freezing venom cutting movement speed by 40% and shoots sharp Ice Snowballs.",
+      "cmd": "/summon spider-overhaul:ice_spider ~ ~ ~",
+      "img": "assets/mobs/spider_overhaul_shot_6.jpg"
+    },
+    {
+      "name": "Sculk Spider",
+      "hp": "30 HP",
+      "danger": "rare",
+      "habitat": "Deep Dark & Ancient Cities",
+      "desc": "Infested with Warden sculk. Blind hunter hanging from ceilings on Deep Silk (Sculk String); hunts purely by sound.",
+      "cmd": "/summon spider-overhaul:sculk_spider ~ ~ ~",
+      "img": "assets/mobs/spider_overhaul_shot_7.jpg"
+    },
+    {
+      "name": "Mushroom Spider",
+      "hp": "14 HP",
+      "danger": "passive",
+      "habitat": "Mushroom Fields & Mycelium",
+      "desc": "Gentle fungal arachnid sporting a bright red mushroom cap on its head. Immune to mob hostility and coexists with Mooshrooms.",
+      "cmd": "/summon spider-overhaul:mushroom_spider ~ ~ ~",
+      "img": "assets/mobs/spider_mushroom_modrinth.png"
+    },
+    {
+      "name": "Savanna Spider",
+      "hp": "16 HP",
+      "danger": "medium",
+      "habitat": "Savanna Plains & Acacia Plateaus",
+      "desc": "Warm orange-striped predator adapted to arid grasslands. High-speed pursuit runner that leaps from tall acacia branches.",
+      "cmd": "/summon spider-overhaul:savanna_spider ~ ~ ~",
+      "img": null
+    },
+    {
+      "name": "Taiga Spider",
+      "hp": "18 HP",
+      "danger": "medium",
+      "habitat": "Old Growth Pine & Taiga",
+      "desc": "Dense spruce-brown bristled coat. Stalks prey quietly through fallen pine needles and dense taiga undergrowth.",
+      "cmd": "/summon spider-overhaul:taiga_spider ~ ~ ~",
+      "img": null
+    },
+    {
+      "name": "Ocean Spider (Spider Crab)",
+      "hp": "20 HP",
+      "danger": "medium",
+      "habitat": "Oceans, Coral Reefs & Coastlines",
+      "desc": "Heavily armored marine crustacean with snapping pincer claws. Drops Crab Legs which can be cooked into delicious Cooked Crab!",
+      "cmd": "/summon spider-overhaul:ocean_spider ~ ~ ~",
+      "img": null
+    },
+    {
+      "name": "Forest Spider (Vanilla)",
+      "hp": "16 HP",
+      "danger": "medium",
+      "habitat": "Overworld Forests & Caves",
+      "desc": "The iconic Minecraft arthropod. Neutral in bright daylight, hostile under moonlight. Climbs vertical cliff walls effortlessly.",
+      "cmd": "/summon minecraft:spider ~ ~ ~",
+      "img": null
+    },
+    {
+      "name": "Cave Spider (Vanilla)",
+      "hp": "12 HP",
+      "danger": "high",
+      "habitat": "Abandoned Mineshafts & Spawners",
+      "desc": "Compact venomous predator. Squeezes through narrow 1x1 corridors and delivers deadly Poison status that bypasses armor.",
+      "cmd": "/summon minecraft:cave_spider ~ ~ ~",
+      "img": null
+    },
+    {
+      "name": "Spider Egg Nest Cocoon",
+      "hp": "Trap Hazard",
+      "danger": "rare",
+      "habitat": "Biomes O' Plenty Silkglades",
+      "desc": "Fragile silken egg cluster woven into thick subterranean webbing. Breaking or trampling it bursts into swarms of hostile cave spiders!",
+      "cmd": "/setblock ~ ~ ~ biomesoplenty:spider_egg",
+      "img": null
+    }
+  ],
+  "friends": [
+    {
+        "name": "Copper Golem",
+        "hp": "20 HP",
+        "danger": "passive",
+        "habitat": "Crafted (Copper Block + Pumpkin + Lightning Rod)",
+        "desc": "Playful robot companion that actively searches for copper buttons and pushes them. Slowly oxidizes over time into a decorative statue unless waxed with honeycomb.",
+        "cmd": "/summon friendsandfoes:copper_golem ~ ~ ~",
+        "img": "assets/mobs/copper_golem.webp"
+    },
+    {
+        "name": "Tuff Golem",
+        "hp": "20 HP",
+        "danger": "passive",
+        "habitat": "Crafted (Tuff + Carpet + Carved Pumpkin)",
+        "desc": "Charming living pedestal that displays weapons and treasures in its hands. When active, it strolls through your base showing off its held item.",
+        "cmd": "/summon friendsandfoes:tuff_golem ~ ~ ~",
+        "img": "assets/mobs/tuff_golem.webp"
+    },
+    {
+        "name": "Rascal",
+        "hp": "20 HP",
+        "danger": "passive",
+        "habitat": "Underground Mineshafts (Y <= 0)",
+        "desc": "Mischievous subterranean dweller that loves hide-and-seek. Find it 3 times within the mineshaft tunnels to receive rare mining pickaxes and supplies.",
+        "cmd": "/summon friendsandfoes:rascal ~ ~ ~",
+        "img": "assets/mobs/rascal.webp"
+    },
+    {
+        "name": "Crab",
+        "hp": "12 HP",
+        "danger": "passive",
+        "habitat": "Mangrove Swamps & Coastal Shores",
+        "desc": "Scuttles sideways across mangrove roots, waves its giant claw, and climbs vertical surfaces. Drops the Crab Claw to extend player building reach.",
+        "cmd": "/summon friendsandfoes:crab ~ ~ ~",
+        "img": "assets/mobs/crab.webp"
+    },
+    {
+        "name": "Glare",
+        "hp": "14 HP",
+        "danger": "passive",
+        "habitat": "Lush Caves & Dark Caverns",
+        "desc": "Floating mossy companion that detests darkness. Flies directly to monster-spawnable dark spots (light level 0) and throws a tantrum to alert the player.",
+        "cmd": "/summon friendsandfoes:glare ~ ~ ~",
+        "img": "assets/mobs/glare.webp"
+    },
+    {
+        "name": "Moobloom",
+        "hp": "10 HP",
+        "danger": "passive",
+        "habitat": "Flower Forests & Terralith Meadows",
+        "desc": "Golden buttercup bovines that sprout yellow blossoms behind their hoofprints and boost the pollination rate of nearby bee hives.",
+        "cmd": "/summon friendsandfoes:moobloom ~ ~ ~",
+        "img": "assets/mobs/moobloom.webp"
+    },
+    {
+        "name": "Iceologer",
+        "hp": "30 HP",
+        "danger": "high",
+        "habitat": "Snowy Slopes & Mountain Peaks",
+        "desc": "Hostile illager cryomancer that conjures crushing chunks of packed ice over targets' heads, dealing heavy bludgeoning damage and freeze slowness.",
+        "cmd": "/summon friendsandfoes:iceologer ~ ~ ~",
+        "img": "assets/mobs/iceologer.webp"
+    },
+    {
+        "name": "Illusioner",
+        "hp": "32 HP",
+        "danger": "high",
+        "habitat": "Dark Forest Illusioner Cabins",
+        "desc": "Master of deception that blinds foes, turns invisible, and conjures 4 tangible mirror clones firing volleys of arrows simultaneously.",
+        "cmd": "/summon friendsandfoes:illusioner ~ ~ ~",
+        "img": "assets/mobs/illusioner.webp"
+    },
+    {
+        "name": "Wildfire (Hovering Inferno)",
+        "hp": "80 HP",
+        "danger": "boss",
+        "habitat": "Nether Fortresses & Bastion Remnants",
+        "desc": "Towering flame lord shielded by 4 rotating obsidian blaze shields. Completely invulnerable while shields orbit; blasts firestorm waves.",
+        "cmd": "/summon friendsandfoes:wildfire ~ ~ ~",
+        "img": "assets/mobs/fnf_wildfire.webp"
+    },
+    {
+        "name": "Desert Mauler",
+        "hp": "30 HP",
+        "danger": "high",
+        "habitat": "Deserts & Badlands Dunes",
+        "desc": "Vicious armored reptilian predator that burrows beneath desert dunes, ambushing unsuspecting travelers with bone-snapping jaws.",
+        "cmd": "/summon friendsandfoes:mauler ~ ~ ~",
+        "img": "assets/mobs/mauler.webp"
+    },
+    {
+        "name": "Barnacle",
+        "hp": "40 HP",
+        "danger": "high",
+        "habitat": "Deep Ocean Trenches",
+        "desc": "Lurking aquatic beast of the ocean depths that pulls swimming prey down into crushing whirlpool jaws.",
+        "cmd": "/summon friendsandfoes:barnacle ~ ~ ~",
+        "img": "assets/mobs/barnacle_spawn_egg.png"
+    }
+],
+  "apple_cows": [
+    {
+      "name": "Apple Cow (Red)",
+      "hp": "10 HP",
+      "danger": "passive",
+      "habitat": "Plains & Terralith Meadows",
+      "desc": "Grows ripe red apples on its back! Shearing it with Shears yields 1-3 fresh apples. Milking with a bowl gives Apple Sauce.",
+      "cmd": "/summon apple_cows:apple_cow ~ ~ ~",
+      "img": "assets/mobs/apple_cow_logo.png"
+    },
+    {
+      "name": "Golden Apple Cow",
+      "hp": "20 HP",
+      "danger": "rare",
+      "habitat": "Flower Forests & Glades",
+      "desc": "Rare golden-coated bovine. Shearing it yields Golden Apples! Milking with a bowl provides Golden Apple Stew with Absorption.",
+      "cmd": "/summon apple_cows:golden_apple_cow ~ ~ ~",
+      "img": "assets/mobs/golden_apple_cow.jpg"
+    },
+    {
+      "name": "Enchanted Golden Apple Cow",
+      "hp": "40 HP",
+      "danger": "rare",
+      "habitat": "Terralith Alpha Islands (Mythic)",
+      "desc": "Glints with purple enchantment shimmer! Incredibly prized livestock. Shearing it yields Enchanted Golden Apples (God Apples).",
+      "cmd": "/summon apple_cows:enchanted_golden_apple_cow ~ ~ ~",
+      "img": "assets/mobs/enchanted_golden_apple_cow.jpg"
+    }
+  ],
+  "critters": [
+    {
+      "name": "Muddy Pig",
+      "hp": "10 HP",
+      "danger": "passive",
+      "habitat": "Swamps & Mud Mangroves",
+      "desc": "Minecraft Earth mud pig! Rolls in mud blocks, growing a thick mud coat with a blooming yellow tulip on its head. Wash in water.",
+      "cmd": "/summon instantfeedback:muddy_pig ~ ~ ~",
+      "img": "assets/mobs/muddy_pig_render.png"
+    },
+    {
+      "name": "Dark Frog",
+      "hp": "10 HP",
+      "danger": "passive",
+      "habitat": "Deep Underground Waters (Y <= 0)",
+      "desc": "Subterranean amphibian. When fed small Magma Cubes, drops unique deep-blue glowing Cerulean Froglights!",
+      "cmd": "/summon instantfeedback:dark_frog ~ ~ ~",
+      "img": "assets/mobs/dark_frog_render.webp"
+    },
+    {
+      "name": "Canadian Goose & Duck",
+      "hp": "8 HP",
+      "danger": "passive",
+      "habitat": "Rivers, Lakes & Ponds",
+      "desc": "Aquatic waterfowl that swim, honk, and dive underwater for weeds. Geese aggressively defend their nest eggs from players.",
+      "cmd": "/summon untitledduckmod:duck ~ ~ ~",
+      "img": "assets/mobs/duck.webp"
+    },
+    {
+      "name": "Ribbits",
+      "hp": "14 HP",
+      "danger": "passive",
+      "habitat": "Swamp Stilt Outposts",
+      "desc": "Adorable nomadic frogfolk who live in wooden stilt huts. Play tiny acoustic flutes, wear acorn caps, and trade swamp flora.",
+      "cmd": "/summon ribbits:ribbit ~ ~ ~",
+      "img": "assets/mobs/ribbits.webp"
+    }
+  ],
+  "villagers": [
+    {
+      "name": "The Beekeeper",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Meadows & Flower Homesteads",
+      "desc": "Workstation: Bottling Stand. Tends wild beehives without angering bees. Trades Honey Bottles, Honeycomb Blocks, and Wildflowers.",
+      "cmd": "/summon villager ~ ~ ~ {VillagerData:{profession:\"homesteads:bee_keeper\"}}",
+      "img": "assets/mobs/homestead_beekeeper.webp"
+    },
+    {
+      "name": "The Prospector",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Mountain Camps & Underground",
+      "desc": "Workstation: Prospector's Bench. Mineral excavator. Trades Diamond/Iron Pickaxes, Raw Gold, Raw Iron, Amethyst, TNT, and Redstone.",
+      "cmd": "/summon villager ~ ~ ~ {VillagerData:{profession:\"homesteads:prospector\"}}",
+      "img": "assets/mobs/homestead_prospector.webp"
+    },
+    {
+      "name": "The Lumberjack",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Forest & Taiga Sawmills",
+      "desc": "Workstation: Lumberjack Station. Timber master. Trades Diamond Axes, Iron Axes, All Tree Saplings (Cherry, Mangrove, Dark Oak), and Coal.",
+      "cmd": "/summon villager ~ ~ ~ {VillagerData:{profession:\"homesteads:lumber_jack\"}}",
+      "img": "assets/mobs/homestead_lumberjack.webp"
+    },
+    {
+      "name": "The Forager",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Jungle & Swamp Shelters",
+      "desc": "Workstation: Forager Bench. Wild botanist. Trades Spore Blossoms, Hanging Vines, Lily Pads, Decorated Pots, Shears, and Lilacs.",
+      "cmd": "/summon villager ~ ~ ~ {VillagerData:{profession:\"homesteads:forager\"}}",
+      "img": "assets/mobs/homestead_forager.webp"
+    },
+    {
+      "name": "The Trapper / Homesteader",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Wilderness Cabins & Taiga",
+      "desc": "Workstation: Tanning Rack. Pioneer hunter. Trades Crossbows, Fishing Rods, Hot Rabbit Stew, Tanned Leather, and String.",
+      "cmd": "/summon villager ~ ~ ~ {VillagerData:{profession:\"homesteads:home_steader\"}}",
+      "img": "assets/mobs/homestead_trapper.webp"
+    },
+    {
+      "name": "The Chef",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Village Gourmet Kitchens",
+      "desc": "Workstation: Cooking Pot & Stove. Master chef in white toque and apron. Trades Multi-Course Feats, Beef Stew, and Honey Glazed Ham.",
+      "cmd": "/summon villager ~ ~ ~ {VillagerData:{profession:\"chefsdelight:chef\"}}",
+      "img": "assets/mobs/chef_villager.png"
+    },
+    {
+      "name": "The Cook",
+      "hp": "20 HP",
+      "danger": "passive",
+      "habitat": "Village Diners & Taverns",
+      "desc": "Workstation: Skillet & Cutting Board. Short-order line cook in red neckerchief. Trades Egg Sandwiches, Burgers, and Pie Slices.",
+      "cmd": "/summon villager ~ ~ ~ {VillagerData:{profession:\"chefsdelight:cook\"}}",
+      "img": "assets/mobs/cook_villager.png"
+    }
+  ]
+};
+
+    function filterMobs(category, btn) {
+      playSound('click');
+      document.querySelectorAll('#bestiary .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const container = document.getElementById('mob-cards-container');
+      container.innerHTML = '';
+
+      if (!mobsData[category]) return;
+
+      mobsData[category].forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'mob-card';
+        const imgHtml = m.img ? `
+          <div class="mob-preview">
+            <img src="${m.img}" alt="${m.name}" loading="lazy" onerror="this.style.display='none'">
+          </div>` : '';
+        card.innerHTML = `
+          ${imgHtml}
+          <div class="mob-header">
+            <span class="mob-name">${m.name}</span>
+            <div class="mob-meta">
+              <span class="hp-badge">❤️ ${m.hp}</span>
+              <span class="danger-badge danger-${m.danger}">${m.danger}</span>
+            </div>
+          </div>
+          <div class="mob-habitat">📍 ${m.habitat}</div>
+          <div class="mob-desc">${m.desc}</div>
+          <div class="command-box" onclick="copyCommand('${m.cmd}')" title="Click to copy command">
+            <span class="command-prompt">&gt;</span>
+            <span class="command-text">${m.cmd}</span>
+            <span class="command-copy-btn">COPY</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* Injected Worldgen Data */
+    const worldgenData = {
+  "terralith_structures": [
+    {
+      "id": "fortified_village",
+      "name": "Fortified Village",
+      "category": "Medieval Citadel",
+      "desc": "Imposing fortified medieval settlement encircled with stone battlements, arrow slits, defensive gatehouses, shooting ranges, and a central lord's keep.",
+      "cmd": "/locate structure terralith:fortified_village",
+      "img": "terralith_struct_fortified_village.webp"
+    },
+    {
+      "id": "fortified_desert_village",
+      "name": "Fortified Desert Village",
+      "category": "Desert Citadel",
+      "desc": "High-walled sandstone stronghold built around desert oases with reinforced watchtowers and observatories built to withstand dune raiders.",
+      "cmd": "/locate structure terralith:fortified_desert_village",
+      "img": "terralith_struct_fortified_desert_village.webp"
+    },
+    {
+      "id": "mage_tower",
+      "name": "Mage Tower",
+      "category": "Arcane Spire",
+      "desc": "Multi-tiered wizard spire piercing the clouds, containing arcane libraries, enchanting tables, brewing stations, and seasonal roof variants.",
+      "cmd": "/locate structure terralith:mage_tower",
+      "img": "terralith_struct_mage_tower.webp"
+    },
+    {
+      "id": "spire",
+      "name": "Desert Spire",
+      "category": "Monolithic Spire",
+      "desc": "Colossal eroded stone needle soaring from canyon floors with hidden ancient treasure alcoves concealed at its apex.",
+      "cmd": "/locate structure terralith:spire",
+      "img": "terralith_struct_spire.webp"
+    },
+    {
+      "id": "sunken_tower",
+      "name": "Sunken Tower",
+      "category": "Subterranean Ruin",
+      "desc": "Ancient flooded stone fortress submerged deep in subterranean aquifer caves and deepslate ravines.",
+      "cmd": "/locate structure terralith:sunken_tower",
+      "img": "terralith_struct_sunken_tower.webp"
+    },
+    {
+      "id": "frosted_dungeon",
+      "name": "Frosted Dungeon",
+      "category": "Glacial Dungeon",
+      "desc": "Underground permafrost catacombs locked beneath thick glacial ice, guarded by strays, powdered snow traps, and frozen loot vaults.",
+      "cmd": "/locate structure terralith:frosted_dungeon",
+      "img": "terralith_struct_frosted_dungeon.webp"
+    },
+    {
+      "id": "giant_bee_hive",
+      "name": "Giant Bee Hive",
+      "category": "Natural Megastructure",
+      "desc": "Colossal underground honey chamber dripping with golden honey blocks, buzzing hives, nectar pools, and rare Royal Jelly.",
+      "cmd": "/locate structure terralith:giant_bee_hive",
+      "img": "terralith_struct_giant_bee_hive.webp"
+    },
+    {
+      "id": "old_refinery",
+      "name": "Old Refinery",
+      "category": "Industrial Excavation",
+      "desc": "Deep subterranean mining and smelting facility equipped with blast furnaces, coal vats, and iron ore transport chutes.",
+      "cmd": "/locate structure terralith:old_refinery",
+      "img": "terralith_struct_old_refinery.webp"
+    },
+    {
+      "id": "valley_lodge",
+      "name": "Valley Lodge",
+      "category": "Alpine Shelter",
+      "desc": "Charming wooden outpost and log cabins nestled deep within secluded alpine valleys and blooming flower glades.",
+      "cmd": "/locate structure terralith:valley_lodge",
+      "img": "terralith_struct_valley_lodge.webp"
+    },
+    {
+      "id": "glacial_hut",
+      "name": "Glacial Hut",
+      "category": "Mountain Refuge",
+      "desc": "Isolated wooden survival cabin perched high atop freezing sub-zero peaks for weary mountain explorers and mountaineers.",
+      "cmd": "/locate structure terralith:glacial_hut",
+      "img": "terralith_struct_glacial_hut.webp"
+    },
+    {
+      "id": "desert_outpost",
+      "name": "Desert Outpost",
+      "category": "Frontier Bastion",
+      "desc": "Rugged sandstone watchtower guarding caravan trade routes through arid canyons, dunes, and badlands.",
+      "cmd": "/locate structure terralith:desert_outpost",
+      "img": "terralith_struct_desert_outpost.webp"
+    }
+  ],
+  "terralith_biomes": [
+    {
+      "id": "alpha_islands",
+      "name": "Alpha Islands",
+      "category": "Skylands & Floating Isles",
+      "desc": "Nostalgic floating islands in the clouds featuring vibrant neon green alpha foliage.",
+      "cmd": "/locate biome terralith:alpha_islands",
+      "img": "terralith_biome_alpha_islands.webp"
+    },
+    {
+      "id": "alpha_islands_winter",
+      "name": "Alpha Islands Winter",
+      "category": "Skylands & Floating Isles",
+      "desc": "Frozen floating archipelago inspired by alpha terrain dusted in pristine white snow.",
+      "cmd": "/locate biome terralith:alpha_islands_winter",
+      "img": "terralith_biome_alpha_islands_winter.webp"
+    },
+    {
+      "id": "alpine_grove",
+      "name": "Alpine Grove",
+      "category": "Forests & Woodlands",
+      "desc": "Lush woodlands rich with diverse flora and timber.",
+      "cmd": "/locate biome terralith:alpine_grove",
+      "img": "terralith_biome_alpine_grove.webp"
+    },
+    {
+      "id": "alpine_highlands",
+      "name": "Alpine Highlands",
+      "category": "Mountains & Highlands",
+      "desc": "Soaring sub-alpine peaks fringed by hardy conifer trees and emerald meadows.",
+      "cmd": "/locate biome terralith:alpine_highlands",
+      "img": "terralith_biome_alpine_highlands.webp"
+    },
+    {
+      "id": "amethyst_canyon",
+      "name": "Amethyst Canyon",
+      "category": "Canyons & Valleys",
+      "desc": "Dazzling canyon cutting through stone with exposed amethyst crystal veins along the cliffs.",
+      "cmd": "/locate biome terralith:amethyst_canyon",
+      "img": "terralith_biome_amethyst_canyon.webp"
+    },
+    {
+      "id": "amethyst_rainforest",
+      "name": "Amethyst Rainforest",
+      "category": "Forests & Woodlands",
+      "desc": "Lush woodlands rich with diverse flora and timber.",
+      "cmd": "/locate biome terralith:amethyst_rainforest",
+      "img": "terralith_biome_amethyst_rainforest.webp"
+    },
+    {
+      "id": "ancient_sands",
+      "name": "Ancient Sands",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:ancient_sands",
+      "img": "terralith_biome_ancient_sands.webp"
+    },
+    {
+      "id": "andesite_caves",
+      "name": "Andesite Caves",
+      "category": "Caves & Underground",
+      "desc": "Subterranean cavern encased in thick layers of andesite and exposed mineral veins.",
+      "cmd": "/locate biome terralith:andesite_caves",
+      "img": "terralith_biome_andesite_caves.webp"
+    },
+    {
+      "id": "arid_highlands",
+      "name": "Arid Highlands",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:arid_highlands",
+      "img": "terralith_biome_arid_highlands.webp"
+    },
+    {
+      "id": "ashen_savanna",
+      "name": "Ashen Savanna",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:ashen_savanna",
+      "img": "terralith_biome_ashen_savanna.webp"
+    },
+    {
+      "id": "basalt_cliffs",
+      "name": "Basalt Cliffs",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:basalt_cliffs",
+      "img": "terralith_biome_basalt_cliffs.webp"
+    },
+    {
+      "id": "birch_taiga",
+      "name": "Birch Taiga",
+      "category": "Forests & Woodlands",
+      "desc": "Cold northern woodland blending white birch bark with hardy spruce needles.",
+      "cmd": "/locate biome terralith:birch_taiga",
+      "img": "terralith_biome_birch_taiga.webp"
+    },
+    {
+      "id": "blooming_plateau",
+      "name": "Blooming Plateau",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:blooming_plateau",
+      "img": "terralith_biome_blooming_plateau.webp"
+    },
+    {
+      "id": "blooming_valley",
+      "name": "Blooming Valley",
+      "category": "Canyons & Valleys",
+      "desc": "Lush sheltered valley carpeted with thousands of vibrant multi-colored flowers.",
+      "cmd": "/locate biome terralith:blooming_valley",
+      "img": "terralith_biome_blooming_valley.webp"
+    },
+    {
+      "id": "brushland",
+      "name": "Brushland",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:brushland",
+      "img": "terralith_biome_brushland.webp"
+    },
+    {
+      "id": "bryce_canyon",
+      "name": "Bryce Canyon",
+      "category": "Canyons & Valleys",
+      "desc": "Spectacular labyrinth of towering red terracotta hoodoos and amphitheaters.",
+      "cmd": "/locate biome terralith:bryce_canyon",
+      "img": "terralith_biome_bryce_canyon.webp"
+    },
+    {
+      "id": "caldera",
+      "name": "Caldera",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:caldera",
+      "img": "terralith_biome_caldera.webp"
+    },
+    {
+      "id": "cloud_forest",
+      "name": "Cloud Forest",
+      "category": "Forests & Woodlands",
+      "desc": "Lush woodlands rich with diverse flora and timber.",
+      "cmd": "/locate biome terralith:cloud_forest",
+      "img": "terralith_biome_cloud_forest.webp"
+    },
+    {
+      "id": "cold_shrubland",
+      "name": "Cold Shrubland",
+      "category": "Plains & Arid Lands",
+      "desc": "Mediterranean style rolling hills covered with low shrubs and wildflowers.",
+      "cmd": "/locate biome terralith:cold_shrubland",
+      "img": "terralith_biome_cold_shrubland.webp"
+    },
+    {
+      "id": "deep_caves",
+      "name": "Deep Caves",
+      "category": "Caves & Underground",
+      "desc": "Pitch-black cavern system carved into solid deepslate at bedrock depth.",
+      "cmd": "/locate biome terralith:deep_caves",
+      "img": "terralith_biome_deep_caves.webp"
+    },
+    {
+      "id": "deep_warm_ocean",
+      "name": "Deep Warm Ocean",
+      "category": "Oceans & Waters",
+      "desc": "Tropical abyss teeming with colossal coral reefs, sea pickles, and warm trenches.",
+      "cmd": "/locate biome terralith:deep_warm_ocean",
+      "img": "terralith_biome_deep_warm_ocean.webp"
+    },
+    {
+      "id": "desert_canyon",
+      "name": "Desert Canyon",
+      "category": "Canyons & Valleys",
+      "desc": "Arid red-rock gorge carved out by ancient prehistoric riverbeds.",
+      "cmd": "/locate biome terralith:desert_canyon",
+      "img": "terralith_biome_desert_canyon.webp"
+    },
+    {
+      "id": "desert_oasis",
+      "name": "Desert Oasis",
+      "category": "Plains & Arid Lands",
+      "desc": "Thriving palm paradise centered around crystal-clear desert water springs.",
+      "cmd": "/locate biome terralith:desert_oasis",
+      "img": "terralith_biome_desert_oasis.webp"
+    },
+    {
+      "id": "desert_spires",
+      "name": "Desert Spires",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:desert_spires",
+      "img": "terralith_biome_desert_spires.webp"
+    },
+    {
+      "id": "diorite_caves",
+      "name": "Diorite Caves",
+      "category": "Caves & Underground",
+      "desc": "Pale diorite stone caverns accented with winding underground streams.",
+      "cmd": "/locate biome terralith:diorite_caves",
+      "img": "terralith_biome_diorite_caves.webp"
+    },
+    {
+      "id": "emerald_peaks",
+      "name": "Emerald Peaks",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:emerald_peaks",
+      "img": "terralith_biome_emerald_peaks.webp"
+    },
+    {
+      "id": "forested_highlands",
+      "name": "Forested Highlands",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:forested_highlands",
+      "img": "terralith_biome_forested_highlands.webp"
+    },
+    {
+      "id": "fractured_savanna",
+      "name": "Fractured Savanna",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:fractured_savanna",
+      "img": "terralith_biome_fractured_savanna.webp"
+    },
+    {
+      "id": "frostfire_caves",
+      "name": "Frostfire Caves",
+      "category": "Caves & Underground",
+      "desc": "Surreal paradox cave where cryogenic blue ice meets blistering magma vents.",
+      "cmd": "/locate biome terralith:frostfire_caves",
+      "img": "terralith_biome_frostfire_caves.webp"
+    },
+    {
+      "id": "frozen_cliffs",
+      "name": "Frozen Cliffs",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:frozen_cliffs",
+      "img": "terralith_biome_frozen_cliffs.webp"
+    },
+    {
+      "id": "fungal_caves",
+      "name": "Fungal Caves",
+      "category": "Caves & Underground",
+      "desc": "Moist underground cavern carpeted in luminescent mycelium, mushrooms, and fungal spores.",
+      "cmd": "/locate biome terralith:fungal_caves",
+      "img": "terralith_biome_fungal_caves.webp"
+    },
+    {
+      "id": "glacial_chasm",
+      "name": "Glacial Chasm",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:glacial_chasm",
+      "img": "terralith_biome_glacial_chasm.webp"
+    },
+    {
+      "id": "granite_caves",
+      "name": "Granite Caves",
+      "category": "Caves & Underground",
+      "desc": "Vibrant reddish-brown granite chambers with natural subterranean stone bridges.",
+      "cmd": "/locate biome terralith:granite_caves",
+      "img": "terralith_biome_granite_caves.webp"
+    },
+    {
+      "id": "granite_cliffs",
+      "name": "Granite Cliffs",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:granite_cliffs",
+      "img": "terralith_biome_granite_cliffs.webp"
+    },
+    {
+      "id": "gravel_beach",
+      "name": "Gravel Beach",
+      "category": "Plains & Arid Lands",
+      "desc": "Rough pebble beach where crashing waves meet stone cliffs.",
+      "cmd": "/locate biome terralith:gravel_beach",
+      "img": "terralith_biome_gravel_beach.webp"
+    },
+    {
+      "id": "gravel_desert",
+      "name": "Gravel Desert",
+      "category": "Plains & Arid Lands",
+      "desc": "Bleak windswept desert composed of endless gravel plains and dry shrubs.",
+      "cmd": "/locate biome terralith:gravel_desert",
+      "img": "terralith_biome_gravel_desert.webp"
+    },
+    {
+      "id": "haze_mountain",
+      "name": "Haze Mountain",
+      "category": "Mountains & Highlands",
+      "desc": "Towering mountain chain shrouded in atmospheric purple haze and rugged scree.",
+      "cmd": "/locate biome terralith:haze_mountain",
+      "img": "terralith_biome_haze_mountain.webp"
+    },
+    {
+      "id": "highlands",
+      "name": "Highlands",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:highlands",
+      "img": "terralith_biome_highlands.webp"
+    },
+    {
+      "id": "hot_shrubland",
+      "name": "Hot Shrubland",
+      "category": "Plains & Arid Lands",
+      "desc": "Mediterranean style rolling hills covered with low shrubs and wildflowers.",
+      "cmd": "/locate biome terralith:hot_shrubland",
+      "img": "terralith_biome_hot_shrubland.webp"
+    },
+    {
+      "id": "ice_marsh",
+      "name": "Ice Marsh",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:ice_marsh",
+      "img": "terralith_biome_ice_marsh.webp"
+    },
+    {
+      "id": "infested_caves",
+      "name": "Infested Caves",
+      "category": "Caves & Underground",
+      "desc": "Treacherous infested cavern packed with silverfish stone and hazardous cracked walls.",
+      "cmd": "/locate biome terralith:infested_caves",
+      "img": "terralith_biome_infested_caves.webp"
+    },
+    {
+      "id": "jungle_mountains",
+      "name": "Jungle Mountains",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:jungle_mountains",
+      "img": "terralith_biome_jungle_mountains.webp"
+    },
+    {
+      "id": "lavender_forest",
+      "name": "Lavender Forest",
+      "category": "Forests & Woodlands",
+      "desc": "Lush woodlands rich with diverse flora and timber.",
+      "cmd": "/locate biome terralith:lavender_forest",
+      "img": "terralith_biome_lavender_forest.webp"
+    },
+    {
+      "id": "lavender_valley",
+      "name": "Lavender Valley",
+      "category": "Canyons & Valleys",
+      "desc": "Peaceful mountain vale blanketed in fragrant lilac lavender blossoms.",
+      "cmd": "/locate biome terralith:lavender_valley",
+      "img": "terralith_biome_lavender_valley.webp"
+    },
+    {
+      "id": "lush_desert",
+      "name": "Lush Desert",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:lush_desert",
+      "img": "terralith_biome_lush_desert.webp"
+    },
+    {
+      "id": "lush_valley",
+      "name": "Lush Valley",
+      "category": "Canyons & Valleys",
+      "desc": "Sweeping canyon gorge carved through scenic terrain.",
+      "cmd": "/locate biome terralith:lush_valley",
+      "img": "terralith_biome_lush_valley.webp"
+    },
+    {
+      "id": "mantle_caves",
+      "name": "Mantle Caves",
+      "category": "Caves & Underground",
+      "desc": "Searing volcanic mantle cavern right above the void, bubbling with magma and volcanic gas.",
+      "cmd": "/locate biome terralith:mantle_caves",
+      "img": "terralith_biome_mantle_caves.webp"
+    },
+    {
+      "id": "mirage_isles",
+      "name": "Mirage Isles",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:mirage_isles",
+      "img": "terralith_biome_mirage_isles.webp"
+    },
+    {
+      "id": "moonlight_grove",
+      "name": "Moonlight Grove",
+      "category": "Forests & Woodlands",
+      "desc": "Lush woodlands rich with diverse flora and timber.",
+      "cmd": "/locate biome terralith:moonlight_grove",
+      "img": "terralith_biome_moonlight_grove.webp"
+    },
+    {
+      "id": "moonlight_valley",
+      "name": "Moonlight Valley",
+      "category": "Canyons & Valleys",
+      "desc": "Mystical twilight vale with cool-tinted grass and tranquil starry skies.",
+      "cmd": "/locate biome terralith:moonlight_valley",
+      "img": "terralith_biome_moonlight_valley.webp"
+    },
+    {
+      "id": "orchid_swamp",
+      "name": "Orchid Swamp",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:orchid_swamp",
+      "img": "terralith_biome_orchid_swamp.webp"
+    },
+    {
+      "id": "painted_mountains",
+      "name": "Painted Mountains",
+      "category": "Mountains & Highlands",
+      "desc": "Dramatic stratified peaks displaying multi-colored terracotta mineral bands.",
+      "cmd": "/locate biome terralith:painted_mountains",
+      "img": "terralith_biome_painted_mountains.webp"
+    },
+    {
+      "id": "red_oasis",
+      "name": "Red Oasis",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:red_oasis",
+      "img": "terralith_biome_red_oasis.webp"
+    },
+    {
+      "id": "rocky_jungle",
+      "name": "Rocky Jungle",
+      "category": "Forests & Woodlands",
+      "desc": "Lush woodlands rich with diverse flora and timber.",
+      "cmd": "/locate biome terralith:rocky_jungle",
+      "img": "terralith_biome_rocky_jungle.webp"
+    },
+    {
+      "id": "rocky_mountains",
+      "name": "Rocky Mountains",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:rocky_mountains",
+      "img": "terralith_biome_rocky_mountains.webp"
+    },
+    {
+      "id": "rocky_shrubland",
+      "name": "Rocky Shrubland",
+      "category": "Plains & Arid Lands",
+      "desc": "Mediterranean style rolling hills covered with low shrubs and wildflowers.",
+      "cmd": "/locate biome terralith:rocky_shrubland",
+      "img": "terralith_biome_rocky_shrubland.webp"
+    },
+    {
+      "id": "sakura_grove",
+      "name": "Sakura Grove",
+      "category": "Forests & Woodlands",
+      "desc": "Serene pink cherry blossom grove raining petals onto fresh green grass.",
+      "cmd": "/locate biome terralith:sakura_grove",
+      "img": "terralith_biome_sakura_grove.webp"
+    },
+    {
+      "id": "sakura_valley",
+      "name": "Sakura Valley",
+      "category": "Canyons & Valleys",
+      "desc": "Sweeping canyon gorge carved through scenic terrain.",
+      "cmd": "/locate biome terralith:sakura_valley",
+      "img": "terralith_biome_sakura_valley.webp"
+    },
+    {
+      "id": "sandstone_valley",
+      "name": "Sandstone Valley",
+      "category": "Canyons & Valleys",
+      "desc": "Sweeping golden sandstone canyon bordered by sheer smoothed cliffs.",
+      "cmd": "/locate biome terralith:sandstone_valley",
+      "img": "terralith_biome_sandstone_valley.webp"
+    },
+    {
+      "id": "savanna_badlands",
+      "name": "Savanna Badlands",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:savanna_badlands",
+      "img": "terralith_biome_savanna_badlands.webp"
+    },
+    {
+      "id": "savanna_slopes",
+      "name": "Savanna Slopes",
+      "category": "Plains & Arid Lands",
+      "desc": "Rolling golden grasslands ascending toward rugged acacia bluffs.",
+      "cmd": "/locate biome terralith:savanna_slopes",
+      "img": "terralith_biome_savanna_slopes.webp"
+    },
+    {
+      "id": "scarlet_mountains",
+      "name": "Scarlet Mountains",
+      "category": "Mountains & Highlands",
+      "desc": "Blood-red peaks composed of netherrack, deepslate, and rich redstone ore veins.",
+      "cmd": "/locate biome terralith:scarlet_mountains",
+      "img": "terralith_biome_scarlet_mountains.webp"
+    },
+    {
+      "id": "shield",
+      "name": "Shield",
+      "category": "Forests & Woodlands",
+      "desc": "Vast boreal landscape of exposed bedrock, pine trees, and glacial lakes.",
+      "cmd": "/locate biome terralith:shield",
+      "img": "terralith_biome_shield.webp"
+    },
+    {
+      "id": "shield_clearing",
+      "name": "Shield Clearing",
+      "category": "Forests & Woodlands",
+      "desc": "Vast boreal landscape of exposed bedrock, pine trees, and glacial lakes.",
+      "cmd": "/locate biome terralith:shield_clearing",
+      "img": "terralith_biome_shield_clearing.webp"
+    },
+    {
+      "id": "shrubland",
+      "name": "Shrubland",
+      "category": "Plains & Arid Lands",
+      "desc": "Mediterranean style rolling hills covered with low shrubs and wildflowers.",
+      "cmd": "/locate biome terralith:shrubland",
+      "img": "terralith_biome_shrubland.webp"
+    },
+    {
+      "id": "siberian_grove",
+      "name": "Siberian Grove",
+      "category": "Forests & Woodlands",
+      "desc": "Freezing taiga forest adapted to harsh blizzards and permafrost.",
+      "cmd": "/locate biome terralith:siberian_grove",
+      "img": "terralith_biome_siberian_grove.webp"
+    },
+    {
+      "id": "siberian_taiga",
+      "name": "Siberian Taiga",
+      "category": "Forests & Woodlands",
+      "desc": "Lush woodlands rich with diverse flora and timber.",
+      "cmd": "/locate biome terralith:siberian_taiga",
+      "img": "terralith_biome_siberian_taiga.webp"
+    },
+    {
+      "id": "skylands_autumn",
+      "name": "Skylands Autumn",
+      "category": "Skylands & Floating Isles",
+      "desc": "Sky islands drifting through golden autumn foliage and falling leaves.",
+      "cmd": "/locate biome terralith:skylands_autumn",
+      "img": "terralith_biome_skylands_autumn.webp"
+    },
+    {
+      "id": "skylands_spring",
+      "name": "Skylands Spring",
+      "category": "Skylands & Floating Isles",
+      "desc": "Airborne paradise lush with blooming cherry blossoms and fresh mountain springs.",
+      "cmd": "/locate biome terralith:skylands_spring",
+      "img": "terralith_biome_skylands_spring.webp"
+    },
+    {
+      "id": "skylands_summer",
+      "name": "Skylands Summer",
+      "category": "Skylands & Floating Isles",
+      "desc": "Verdant floating islands basking in endless bright sun above the clouds.",
+      "cmd": "/locate biome terralith:skylands_summer",
+      "img": "terralith_biome_skylands_summer.webp"
+    },
+    {
+      "id": "skylands_winter",
+      "name": "Skylands Winter",
+      "category": "Skylands & Floating Isles",
+      "desc": "Glacial sky islands encrusted with icebergs and sub-zero cloudbanks.",
+      "cmd": "/locate biome terralith:skylands_winter",
+      "img": "terralith_biome_skylands_winter.webp"
+    },
+    {
+      "id": "snowy_badlands",
+      "name": "Snowy Badlands",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:snowy_badlands",
+      "img": "terralith_biome_snowy_badlands.webp"
+    },
+    {
+      "id": "snowy_cherry_grove",
+      "name": "Snowy Cherry Grove",
+      "category": "Forests & Woodlands",
+      "desc": "Winter wonderland where delicate cherry blossoms are covered in soft snow.",
+      "cmd": "/locate biome terralith:snowy_cherry_grove",
+      "img": "terralith_biome_snowy_cherry_grove.webp"
+    },
+    {
+      "id": "snowy_maple_forest",
+      "name": "Snowy Maple Forest",
+      "category": "Forests & Woodlands",
+      "desc": "Lush woodlands rich with diverse flora and timber.",
+      "cmd": "/locate biome terralith:snowy_maple_forest",
+      "img": "terralith_biome_snowy_maple_forest.webp"
+    },
+    {
+      "id": "snowy_shield",
+      "name": "Snowy Shield",
+      "category": "Forests & Woodlands",
+      "desc": "Vast boreal landscape of exposed bedrock, pine trees, and glacial lakes.",
+      "cmd": "/locate biome terralith:snowy_shield",
+      "img": "terralith_biome_snowy_shield.webp"
+    },
+    {
+      "id": "steppe",
+      "name": "Steppe",
+      "category": "Plains & Arid Lands",
+      "desc": "Broad semi-arid grassland stretching between fertile plains and deserts.",
+      "cmd": "/locate biome terralith:steppe",
+      "img": "terralith_biome_steppe.webp"
+    },
+    {
+      "id": "stony_spires",
+      "name": "Stony Spires",
+      "category": "Mountains & Highlands",
+      "desc": "Barren windswept granite crags towering above the timberline.",
+      "cmd": "/locate biome terralith:stony_spires",
+      "img": "terralith_biome_stony_spires.webp"
+    },
+    {
+      "id": "temperate_highlands",
+      "name": "Temperate Highlands",
+      "category": "Mountains & Highlands",
+      "desc": "Elevated highland plateaus offering breathtaking panoramic vistas of the surrounding world.",
+      "cmd": "/locate biome terralith:temperate_highlands",
+      "img": "terralith_biome_temperate_highlands.webp"
+    },
+    {
+      "id": "thermal_caves",
+      "name": "Thermal Caves",
+      "category": "Caves & Underground",
+      "desc": "Underground geothermal hot springs surrounded by steam vents and bubbling magma bands.",
+      "cmd": "/locate biome terralith:thermal_caves",
+      "img": "terralith_biome_thermal_caves.webp"
+    },
+    {
+      "id": "tropical_jungle",
+      "name": "Tropical Jungle",
+      "category": "Forests & Woodlands",
+      "desc": "Dense equatorial rainforest teeming with hanging vines, cocoa, and canopy trees.",
+      "cmd": "/locate biome terralith:tropical_jungle",
+      "img": "terralith_biome_tropical_jungle.webp"
+    },
+    {
+      "id": "tuff_caves",
+      "name": "Tuff Caves",
+      "category": "Caves & Underground",
+      "desc": "Dark volcanic tuff chambers with dense basalt outcroppings and raw mineral seams.",
+      "cmd": "/locate biome terralith:tuff_caves",
+      "img": "terralith_biome_tuff_caves.webp"
+    },
+    {
+      "id": "underground_jungle",
+      "name": "Underground Jungle",
+      "category": "Caves & Underground",
+      "desc": "Lush subterranean jungle cavern filled with giant vines, moss, and sunlight shafts.",
+      "cmd": "/locate biome terralith:underground_jungle",
+      "img": "terralith_biome_underground_jungle.webp"
+    },
+    {
+      "id": "valley_clearing",
+      "name": "Valley Clearing",
+      "category": "Canyons & Valleys",
+      "desc": "Sweeping canyon gorge carved through scenic terrain.",
+      "cmd": "/locate biome terralith:valley_clearing",
+      "img": "terralith_biome_valley_clearing.webp"
+    },
+    {
+      "id": "volcanic_crater",
+      "name": "Volcanic Crater",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:volcanic_crater",
+      "img": "terralith_biome_volcanic_crater.webp"
+    },
+    {
+      "id": "volcanic_peaks",
+      "name": "Volcanic Peaks",
+      "category": "Mountains & Highlands",
+      "desc": "Jagged black volcanic summits crowned with smoking fissures and ash deposits.",
+      "cmd": "/locate biome terralith:volcanic_peaks",
+      "img": "terralith_biome_volcanic_peaks.webp"
+    },
+    {
+      "id": "warm_river",
+      "name": "Warm River",
+      "category": "Oceans & Waters",
+      "desc": "Gentle sun-warmed river meandering through lush tropical terrain.",
+      "cmd": "/locate biome terralith:warm_river",
+      "img": "terralith_biome_warm_river.webp"
+    },
+    {
+      "id": "warped_mesa",
+      "name": "Warped Mesa",
+      "category": "Canyons & Valleys",
+      "desc": "Sweeping canyon gorge carved through scenic terrain.",
+      "cmd": "/locate biome terralith:warped_mesa",
+      "img": "terralith_biome_warped_mesa.webp"
+    },
+    {
+      "id": "white_cliffs",
+      "name": "White Cliffs",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:white_cliffs",
+      "img": "terralith_biome_white_cliffs.webp"
+    },
+    {
+      "id": "white_mesa",
+      "name": "White Mesa",
+      "category": "Canyons & Valleys",
+      "desc": "Striking pale calcite and quartz mesa glowing brilliantly under the sun.",
+      "cmd": "/locate biome terralith:white_mesa",
+      "img": "terralith_biome_white_mesa.webp"
+    },
+    {
+      "id": "windswept_spires",
+      "name": "Windswept Spires",
+      "category": "Mountains & Highlands",
+      "desc": "Gravity-defying stone needles eroded into dramatic slender spires.",
+      "cmd": "/locate biome terralith:windswept_spires",
+      "img": "terralith_biome_windswept_spires.webp"
+    },
+    {
+      "id": "wintry_forest",
+      "name": "Wintry Forest",
+      "category": "Forests & Woodlands",
+      "desc": "Silent cold woodland blanketed in white snow under pale winter skies.",
+      "cmd": "/locate biome terralith:wintry_forest",
+      "img": "terralith_biome_wintry_forest.webp"
+    },
+    {
+      "id": "wintry_lowlands",
+      "name": "Wintry Lowlands",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:wintry_lowlands",
+      "img": "terralith_biome_wintry_lowlands.webp"
+    },
+    {
+      "id": "yellowstone",
+      "name": "Yellowstone",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:yellowstone",
+      "img": "terralith_biome_yellowstone.webp"
+    },
+    {
+      "id": "yosemite_cliffs",
+      "name": "Yosemite Cliffs",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:yosemite_cliffs",
+      "img": "terralith_biome_yosemite_cliffs.webp"
+    },
+    {
+      "id": "yosemite_lowlands",
+      "name": "Yosemite Lowlands",
+      "category": "Plains & Arid Lands",
+      "desc": "Unique open terrain with rich vegetation and varied elevation.",
+      "cmd": "/locate biome terralith:yosemite_lowlands",
+      "img": "terralith_biome_yosemite_lowlands.webp"
+    }
+  ],
+  "bop_biomes": [
+    {
+      "id": "auroral_garden",
+      "name": "Auroral Garden",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Ethereal glowing forest illuminated by luminescent flora and rainbow hued foliage.",
+      "cmd": "/locate biome biomesoplenty:auroral_garden",
+      "img": "bop_biome_auroral_garden.webp"
+    },
+    {
+      "id": "bayou",
+      "name": "Bayou",
+      "category": "Wetlands & Swamps",
+      "dimension": "Overworld",
+      "desc": "Murky cypress swamp with Spanish moss draping into murky waters, water lilies, and reeds.",
+      "cmd": "/locate biome biomesoplenty:bayou",
+      "img": "bop_biome_bayou.webp"
+    },
+    {
+      "id": "bog",
+      "name": "Bog",
+      "category": "Wetlands & Swamps",
+      "dimension": "Overworld",
+      "desc": "Peat bog with murky stagnant water pockets, duckweed, mud blocks, and bog iron.",
+      "cmd": "/locate biome biomesoplenty:bog",
+      "img": "bop_biome_bog.webp"
+    },
+    {
+      "id": "cold_desert",
+      "name": "Cold Desert",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Frigid windswept desert of white sand, dry tumbleweeds, and frosty nights.",
+      "cmd": "/locate biome biomesoplenty:cold_desert",
+      "img": "bop_biome_cold_desert.webp"
+    },
+    {
+      "id": "coniferous_forest",
+      "name": "Coniferous Forest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Dense evergreen timberland with soaring fir trees, fallen logs, and pine cone undergrowth.",
+      "cmd": "/locate biome biomesoplenty:coniferous_forest",
+      "img": "bop_biome_coniferous_forest.webp"
+    },
+    {
+      "id": "crag",
+      "name": "Crag",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Hostile craggy canyon terrain with sharp basalt pinnacles and barren rocky soil.",
+      "cmd": "/locate biome biomesoplenty:crag",
+      "img": "bop_biome_crag.webp"
+    },
+    {
+      "id": "crystalline_chasm",
+      "name": "Crystalline Chasm",
+      "category": "Nether",
+      "dimension": "The Nether",
+      "desc": "Glittering Nether chasm bristling with luminous crystal shards and spires.",
+      "cmd": "/locate biome biomesoplenty:crystalline_chasm",
+      "img": "bop_biome_crystalline_chasm.webp"
+    },
+    {
+      "id": "dead_forest",
+      "name": "Dead Forest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Desolate expanse of charred, leafless trees with withered brambles and eerie silence.",
+      "cmd": "/locate biome biomesoplenty:dead_forest",
+      "img": "bop_biome_dead_forest.webp"
+    },
+    {
+      "id": "dryland",
+      "name": "Dryland",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Arid scrubby transition zone between desert and savanna with sparse hardy acacia.",
+      "cmd": "/locate biome biomesoplenty:dryland",
+      "img": "bop_biome_dryland.webp"
+    },
+    {
+      "id": "dune_beach",
+      "name": "Dune Beach",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Sweeping golden coastal sand dunes shaped by relentless ocean breezes.",
+      "cmd": "/locate biome biomesoplenty:dune_beach",
+      "img": "bop_biome_dune_beach.webp"
+    },
+    {
+      "id": "end_corruption",
+      "name": "End Corruption",
+      "category": "The End",
+      "dimension": "The End",
+      "desc": "Corrupted purple void terrain warped by decaying endstone and anomalous void tears.",
+      "cmd": "/locate biome biomesoplenty:end_corruption",
+      "img": "bop_biome_end_corruption.webp"
+    },
+    {
+      "id": "end_flats",
+      "name": "End Flats",
+      "category": "The End",
+      "dimension": "The End",
+      "desc": "Bleak pale endstone plains swept by eerie cosmic winds and quiet emptiness.",
+      "cmd": "/locate biome biomesoplenty:end_flats",
+      "img": "bop_biome_end_flats.webp"
+    },
+    {
+      "id": "end_reef",
+      "name": "End Reef",
+      "category": "The End",
+      "dimension": "The End",
+      "desc": "Otherworldly cosmic reef formed from bioluminescent purpur polyps and floating crystals.",
+      "cmd": "/locate biome biomesoplenty:end_reef",
+      "img": "bop_biome_end_reef.webp"
+    },
+    {
+      "id": "end_wilds",
+      "name": "End Wilds",
+      "category": "The End",
+      "dimension": "The End",
+      "desc": "Alien End wilderness teeming with bizarre wild chorus variants and celestial flora.",
+      "cmd": "/locate biome biomesoplenty:end_wilds",
+      "img": "bop_biome_end_wilds.webp"
+    },
+    {
+      "id": "erupting_inferno",
+      "name": "Erupting Inferno",
+      "category": "Nether",
+      "dimension": "The Nether",
+      "desc": "Volcanic Nether hellscape dominated by active lava geysers and pyroclastic vents.",
+      "cmd": "/locate biome biomesoplenty:erupting_inferno",
+      "img": "bop_biome_erupting_inferno.webp"
+    },
+    {
+      "id": "field",
+      "name": "Field",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Vast waving fields of tall prairie grass and wildflowers stretching toward the horizon.",
+      "cmd": "/locate biome biomesoplenty:field",
+      "img": "bop_biome_field.webp"
+    },
+    {
+      "id": "fir_clearing",
+      "name": "Fir Clearing",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Sunny forest meadow surrounded by tall Douglas fir trees and wild clover.",
+      "cmd": "/locate biome biomesoplenty:fir_clearing",
+      "img": "bop_biome_fir_clearing.webp"
+    },
+    {
+      "id": "floodplain",
+      "name": "Floodplain",
+      "category": "Wetlands & Swamps",
+      "dimension": "Overworld",
+      "desc": "Fertile river valley subject to seasonal inundation, rich silt, and lush watercress.",
+      "cmd": "/locate biome biomesoplenty:floodplain",
+      "img": "bop_biome_floodplain.webp"
+    },
+    {
+      "id": "forested_field",
+      "name": "Forested Field",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Rolling open grassland speckled with picturesque clusters of birch and oak trees.",
+      "cmd": "/locate biome biomesoplenty:forested_field",
+      "img": "bop_biome_forested_field.webp"
+    },
+    {
+      "id": "fungal_jungle",
+      "name": "Fungal Jungle",
+      "category": "Caves & Underground",
+      "dimension": "Overworld",
+      "desc": "Subterranean fungal jungle with colossal glowing shelf mushrooms and drifting spores.",
+      "cmd": "/locate biome biomesoplenty:fungal_jungle",
+      "img": "bop_biome_fungal_jungle.webp"
+    },
+    {
+      "id": "glowing_grotto",
+      "name": "Glowing Grotto",
+      "category": "Caves & Underground",
+      "dimension": "Overworld",
+      "desc": "Breathtaking crystal cave sparkling with glowing blue celestine and fluorite crystals.",
+      "cmd": "/locate biome biomesoplenty:glowing_grotto",
+      "img": "bop_biome_glowing_grotto.webp"
+    },
+    {
+      "id": "gravel_beach",
+      "name": "Gravel Beach",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Rugged pebble shoreline where rough waves crash against gravel terraces.",
+      "cmd": "/locate biome biomesoplenty:gravel_beach",
+      "img": "bop_biome_gravel_beach.webp"
+    },
+    {
+      "id": "highland",
+      "name": "Highland",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Elevated windy plateaus covered in hardy highland grasses, boulders, and sheep.",
+      "cmd": "/locate biome biomesoplenty:highland",
+      "img": "bop_biome_highland.webp"
+    },
+    {
+      "id": "hot_springs",
+      "name": "Hot Springs",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Geothermal wonderland featuring steaming mineral spring pools, sulfur vents, and caldrons.",
+      "cmd": "/locate biome biomesoplenty:hot_springs",
+      "img": "bop_biome_hot_springs.webp"
+    },
+    {
+      "id": "jade_cliffs",
+      "name": "Jade Cliffs",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Breathtaking steep limestone and jade karst cliffs covered in clinging evergreen bonsai.",
+      "cmd": "/locate biome biomesoplenty:jade_cliffs",
+      "img": "bop_biome_jade_cliffs.webp"
+    },
+    {
+      "id": "lavender_field",
+      "name": "Lavender Field",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Scented purple carpets of blooming lavender blossoms undulating in the breeze.",
+      "cmd": "/locate biome biomesoplenty:lavender_field",
+      "img": "bop_biome_lavender_field.webp"
+    },
+    {
+      "id": "lush_desert",
+      "name": "Lush Desert",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Thriving desert ecosystem watered by underground aquifers, date palms, and flowering cacti.",
+      "cmd": "/locate biome biomesoplenty:lush_desert",
+      "img": "bop_biome_lush_desert.webp"
+    },
+    {
+      "id": "lush_savanna",
+      "name": "Lush Savanna",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Tropical acacia savanna blessed with frequent rain, verdant green grass, and lush pools.",
+      "cmd": "/locate biome biomesoplenty:lush_savanna",
+      "img": "bop_biome_lush_savanna.webp"
+    },
+    {
+      "id": "maple_woods",
+      "name": "Maple Woods",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Radiant red and orange autumn canopy with sweet saplings and maple leaf litter.",
+      "cmd": "/locate biome biomesoplenty:maple_woods",
+      "img": "bop_biome_maple_woods.webp"
+    },
+    {
+      "id": "marsh",
+      "name": "Marsh",
+      "category": "Wetlands & Swamps",
+      "dimension": "Overworld",
+      "desc": "Broad expanse of shallow wetlands filled with cattails, tall reeds, and wading birds.",
+      "cmd": "/locate biome biomesoplenty:marsh",
+      "img": "bop_biome_marsh.webp"
+    },
+    {
+      "id": "mediterranean_forest",
+      "name": "Mediterranean Forest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Sun-drenched olive and cypress woodland with aromatic thyme and terracotta soil.",
+      "cmd": "/locate biome biomesoplenty:mediterranean_forest",
+      "img": "bop_biome_mediterranean_forest.webp"
+    },
+    {
+      "id": "moor",
+      "name": "Moor",
+      "category": "Wetlands & Swamps",
+      "dimension": "Overworld",
+      "desc": "Misty highland peat moor shrouded in rolling fog and purple heather shrubs.",
+      "cmd": "/locate biome biomesoplenty:moor",
+      "img": "bop_biome_moor.webp"
+    },
+    {
+      "id": "muskeg",
+      "name": "Muskeg",
+      "category": "Wetlands & Swamps",
+      "dimension": "Overworld",
+      "desc": "Northern sub-arctic bog with treacherous spongy peat moss and scattered tamarack trees.",
+      "cmd": "/locate biome biomesoplenty:muskeg",
+      "img": "bop_biome_muskeg.webp"
+    },
+    {
+      "id": "mystic_grove",
+      "name": "Mystic Grove",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Magical fairy forest with shimmering purple grass, jacaranda trees, and glowing toadstools.",
+      "cmd": "/locate biome biomesoplenty:mystic_grove",
+      "img": "bop_biome_mystic_grove.webp"
+    },
+    {
+      "id": "old_growth_dead_forest",
+      "name": "Old Growth Dead Forest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Ancient primeval wasteland of gigantic gnarled fossilized wood and desolate ash.",
+      "cmd": "/locate biome biomesoplenty:old_growth_dead_forest",
+      "img": "bop_biome_old_growth_dead_forest.webp"
+    },
+    {
+      "id": "old_growth_woodland",
+      "name": "Old Growth Woodland",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Majestic old-growth temperate forest featuring colossal oak and spruce trunks.",
+      "cmd": "/locate biome biomesoplenty:old_growth_woodland",
+      "img": "bop_biome_old_growth_woodland.webp"
+    },
+    {
+      "id": "ominous_woods",
+      "name": "Ominous Woods",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Haunted dark canopy draped in cobwebs, thorny briars, and ghastly mist.",
+      "cmd": "/locate biome biomesoplenty:ominous_woods",
+      "img": "bop_biome_ominous_woods.webp"
+    },
+    {
+      "id": "orchard",
+      "name": "Orchard",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Peaceful cultivated groves bursting with blooming fruit trees and fragrant flowers.",
+      "cmd": "/locate biome biomesoplenty:orchard",
+      "img": "bop_biome_orchard.webp"
+    },
+    {
+      "id": "origin_valley",
+      "name": "Origin Valley",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Nostalgic paradise replicating alpha Minecraft with neon green grass, alpha trees, and original roses.",
+      "cmd": "/locate biome biomesoplenty:origin_valley",
+      "img": "bop_biome_origin_valley.webp"
+    },
+    {
+      "id": "overgrown_greens",
+      "name": "Overgrown Greens",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Sprawling verdant plains covered in dense creeping clover, wild weeds, and moss.",
+      "cmd": "/locate biome biomesoplenty:overgrown_greens",
+      "img": "bop_biome_overgrown_greens.webp"
+    },
+    {
+      "id": "pasture",
+      "name": "Pasture",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Fertile agricultural grasslands rich with barley, dandelion blossoms, and grazing livestock.",
+      "cmd": "/locate biome biomesoplenty:pasture",
+      "img": "bop_biome_pasture.webp"
+    },
+    {
+      "id": "prairie",
+      "name": "Prairie",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Flat windswept sea of golden rye grass and wild sage under wide open skies.",
+      "cmd": "/locate biome biomesoplenty:prairie",
+      "img": "bop_biome_prairie.webp"
+    },
+    {
+      "id": "pumpkin_patch",
+      "name": "Pumpkin Patch",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Whimsical autumn plains overgrown with sprawling pumpkin patches and autumn squash.",
+      "cmd": "/locate biome biomesoplenty:pumpkin_patch",
+      "img": "bop_biome_pumpkin_patch.webp"
+    },
+    {
+      "id": "rainforest",
+      "name": "Rainforest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Steaming tropical canopy with towering kapok trees, hanging moss, and dense bamboo shoots.",
+      "cmd": "/locate biome biomesoplenty:rainforest",
+      "img": "bop_biome_rainforest.webp"
+    },
+    {
+      "id": "redwood_forest",
+      "name": "Redwood Forest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Monumental grove of titanic redwood trees reaching the build limit with lush ferns.",
+      "cmd": "/locate biome biomesoplenty:redwood_forest",
+      "img": "bop_biome_redwood_forest.webp"
+    },
+    {
+      "id": "rocky_rainforest",
+      "name": "Rocky Rainforest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Steep mountain slopes covered in dense tropical jungle vegetation and cascading boulders.",
+      "cmd": "/locate biome biomesoplenty:rocky_rainforest",
+      "img": "bop_biome_rocky_rainforest.webp"
+    },
+    {
+      "id": "rocky_shrubland",
+      "name": "Rocky Shrubland",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Semi-arid foothills covered in weathered gravel, boulders, and thorny sagebrush.",
+      "cmd": "/locate biome biomesoplenty:rocky_shrubland",
+      "img": "bop_biome_rocky_shrubland.webp"
+    },
+    {
+      "id": "scrubland",
+      "name": "Scrubland",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Dry arid plain dominated by tough shrubs, dry grass tufts, and parched earth.",
+      "cmd": "/locate biome biomesoplenty:scrubland",
+      "img": "bop_biome_scrubland.webp"
+    },
+    {
+      "id": "seasonal_forest",
+      "name": "Seasonal Forest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Dynamic temperate forest that exhibits shifting autumn foliage and colorful underbrush.",
+      "cmd": "/locate biome biomesoplenty:seasonal_forest",
+      "img": "bop_biome_seasonal_forest.webp"
+    },
+    {
+      "id": "shrubland",
+      "name": "Shrubland",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Rolling hills blanketed in low bush cover and hardy shrubs.",
+      "cmd": "/locate biome biomesoplenty:shrubland",
+      "img": "bop_biome_shrubland.webp"
+    },
+    {
+      "id": "snowblossom_grove",
+      "name": "Snowblossom Grove",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Dreamy winter woodland where pale blue blossoms drift down onto gentle snow blankets.",
+      "cmd": "/locate biome biomesoplenty:snowblossom_grove",
+      "img": "bop_biome_snowblossom_grove.webp"
+    },
+    {
+      "id": "snowy_coniferous_forest",
+      "name": "Snowy Coniferous Forest",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Heavy winter taiga buried beneath deep snow drifts with frost-coated pine needles.",
+      "cmd": "/locate biome biomesoplenty:snowy_coniferous_forest",
+      "img": "bop_biome_snowy_coniferous_forest.webp"
+    },
+    {
+      "id": "snowy_fir_clearing",
+      "name": "Snowy Fir Clearing",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Frozen alpine clearing enclosed by frosted fir trees and ice-crusted ponds.",
+      "cmd": "/locate biome biomesoplenty:snowy_fir_clearing",
+      "img": "bop_biome_snowy_fir_clearing.webp"
+    },
+    {
+      "id": "snowy_maple_woods",
+      "name": "Snowy Maple Woods",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Enchanting winter forest of red and gold maple leaves dusted in glistening snow.",
+      "cmd": "/locate biome biomesoplenty:snowy_maple_woods",
+      "img": "bop_biome_snowy_maple_woods.webp"
+    },
+    {
+      "id": "spider_nest",
+      "name": "Spider Nest",
+      "category": "Caves & Underground",
+      "dimension": "Overworld",
+      "desc": "Terrifying underground arachnid lair coated in thick cobwebs, venom sacs, and egg blocks.",
+      "cmd": "/locate biome biomesoplenty:spider_nest",
+      "img": "bop_biome_spider_nest.webp"
+    },
+    {
+      "id": "subtropics",
+      "name": "Subtropics",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Warm subtropical coastline with fan palms, coastal ferns, and balmy breezes.",
+      "cmd": "/locate biome biomesoplenty:subtropics",
+      "img": "bop_biome_subtropics.webp"
+    },
+    {
+      "id": "tropics",
+      "name": "Tropics",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Tropical island oasis surrounded by turquoise lagoons, palm trees, and vibrant orchids.",
+      "cmd": "/locate biome biomesoplenty:tropics",
+      "img": "bop_biome_tropics.webp"
+    },
+    {
+      "id": "tundra",
+      "name": "Tundra",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Treeless arctic expanse of permafrost, lichen, mosses, and dwarf shrubs.",
+      "cmd": "/locate biome biomesoplenty:tundra",
+      "img": "bop_biome_tundra.webp"
+    },
+    {
+      "id": "undergrowth",
+      "name": "Undergrowth",
+      "category": "Nether",
+      "dimension": "The Nether",
+      "desc": "Dense subterranean Nether canopy overgrown with ivy, giant roots, and toxic fungi.",
+      "cmd": "/locate biome biomesoplenty:undergrowth",
+      "img": "bop_biome_undergrowth.webp"
+    },
+    {
+      "id": "visceral_heap",
+      "name": "Visceral Heap",
+      "category": "Nether",
+      "dimension": "The Nether",
+      "desc": "Horrific Nether landscape formed from pulsating flesh blocks, blood veins, and bone.",
+      "cmd": "/locate biome biomesoplenty:visceral_heap",
+      "img": "bop_biome_visceral_heap.webp"
+    },
+    {
+      "id": "volcanic_plains",
+      "name": "Volcanic Plains",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Black volcanic ash plains scattered with obsidian fragments and smoking fissures.",
+      "cmd": "/locate biome biomesoplenty:volcanic_plains",
+      "img": "bop_biome_volcanic_plains.webp"
+    },
+    {
+      "id": "volcano",
+      "name": "Volcano",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Active volcanic mountain with bubbling lava rivers, basalt cones, and fiery eruptions.",
+      "cmd": "/locate biome biomesoplenty:volcano",
+      "img": "bop_biome_volcano.webp"
+    },
+    {
+      "id": "wasteland",
+      "name": "Wasteland",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Post-apocalyptic irradiated plain of dried mud, dead grass, and toxic sludge.",
+      "cmd": "/locate biome biomesoplenty:wasteland",
+      "img": "bop_biome_wasteland.webp"
+    },
+    {
+      "id": "wasteland_steppe",
+      "name": "Wasteland Steppe",
+      "category": "Arid, Volcanic & Deserts",
+      "dimension": "Overworld",
+      "desc": "Parched dry steppe bordering wasteland zones with toxic dust and bone fragments.",
+      "cmd": "/locate biome biomesoplenty:wasteland_steppe",
+      "img": "bop_biome_wasteland_steppe.webp"
+    },
+    {
+      "id": "wetland",
+      "name": "Wetland",
+      "category": "Wetlands & Swamps",
+      "dimension": "Overworld",
+      "desc": "Verdant wetland swamp rich with willow trees, lush ferns, and abundant frog populations.",
+      "cmd": "/locate biome biomesoplenty:wetland",
+      "img": "bop_biome_wetland.webp"
+    },
+    {
+      "id": "wintry_origin_valley",
+      "name": "Wintry Origin Valley",
+      "category": "Plains & Meadows",
+      "dimension": "Overworld",
+      "desc": "Freezing alpha paradise covered in crisp snow while preserving alpha rose stems.",
+      "cmd": "/locate biome biomesoplenty:wintry_origin_valley",
+      "img": "bop_biome_wintry_origin_valley.webp"
+    },
+    {
+      "id": "withered_abyss",
+      "name": "Withered Abyss",
+      "category": "Nether",
+      "dimension": "The Nether",
+      "desc": "Desolate Nether abyss radiating wither decay, wither roses, and charred black ash.",
+      "cmd": "/locate biome biomesoplenty:withered_abyss",
+      "img": "bop_biome_withered_abyss.webp"
+    },
+    {
+      "id": "woodland",
+      "name": "Woodland",
+      "category": "Woodlands & Forests",
+      "dimension": "Overworld",
+      "desc": "Classic temperate woodland with diverse deciduous canopy, wild mushrooms, and berry bushes.",
+      "cmd": "/locate biome biomesoplenty:woodland",
+      "img": "bop_biome_woodland.webp"
+    }
+  ],
+  "overworld_structures": [
+    {
+        "id": "mmr:desert_mineshaft",
+        "name": "Moog's Desert Mineshaft",
+        "category": "Subterranean Network",
+        "desc": "Exposed canyon and underground mineshaft labyrinth crafted from smooth sandstone and warm acacia timber, featuring webbed tunnels and mining cart rail tracks.",
+        "cmd": "/locate structure mmr:desert_mineshaft",
+        "img": "terralith_struct_desert_outpost.webp"
+    },
+    {
+        "id": "mmr:deep_dark_mineshaft_underground",
+        "name": "Moog's Deep Dark Mineshaft",
+        "category": "Subterranean Network",
+        "desc": "Haunting abandoned shafts overrun by pulsating sculk veins, shriekers, and catalysts deep within the world's deepest bedrock stone layers.",
+        "cmd": "/locate structure mmr:deep_dark_mineshaft_underground",
+        "img": "terralith_struct_frosted_dungeon.webp"
+    },
+    {
+        "id": "mmr:mesa_mineshaft",
+        "name": "Moog's Badlands Mineshaft",
+        "category": "Subterranean Network",
+        "desc": "Sprawling open-air canyon and underground galleries framed by terracotta arches, dark oak timber, and exposed gold veins.",
+        "cmd": "/locate structure mmr:mesa_mineshaft",
+        "img": "terralith_struct_old_refinery.webp"
+    },
+    {
+        "id": "mmr:snowy_mineshaft",
+        "name": "Moog's Snowy Mineshaft",
+        "category": "Subterranean Network",
+        "desc": "Frozen subterranean tunnels reinforced with sturdy spruce timbers, packed ice arches, hanging icicles, and lingering frost.",
+        "cmd": "/locate structure mmr:snowy_mineshaft",
+        "img": "terralith_struct_glacial_hut.webp"
+    },
+    {
+        "id": "mmr:mushroom_mineshaft_underground",
+        "name": "Moog's Mushroom Mineshaft",
+        "category": "Subterranean Network",
+        "desc": "Surreal subterranean mining complex illuminated by glowing giant red and brown mushroom stems and mycelium spore colonies where no hostile monsters spawn.",
+        "cmd": "/locate structure mmr:mushroom_mineshaft_underground",
+        "img": "terralith_struct_giant_bee_hive.webp"
+    },
+    {
+        "id": "ocean_lily_pad_village:market",
+        "name": "Lily Pad Village Market",
+        "category": "Aquatic Settlement",
+        "desc": "Floating open-air ocean trading square built upon colossal reinforced lily pads with merchant stalls, sun canopies, and docking slips.",
+        "cmd": "/locate structure ocean_lily_pad_village:market",
+        "img": "terralith_struct_sunken_tower.webp"
+    },
+    {
+        "id": "ocean_lily_pad_village:temple",
+        "name": "Lily Pad Ocean Temple",
+        "category": "Aquatic Settlement",
+        "desc": "Waterborne cathedral shrine anchored on giant water lilies where ocean villagers gather to worship the tranquility of the deep.",
+        "cmd": "/locate structure ocean_lily_pad_village:temple",
+        "img": "terralith_struct_mage_tower.webp"
+    },
+    {
+        "id": "ocean_lily_pad_village:watchtower",
+        "name": "Lily Pad Watchtower",
+        "category": "Aquatic Settlement",
+        "desc": "Tall coastal lookout tower elevated over ocean waves, surveying the surrounding open seas for drowned sailors and raiding vessels.",
+        "cmd": "/locate structure ocean_lily_pad_village:watchtower",
+        "img": "terralith_struct_spire.webp"
+    },
+    {
+        "id": "village_taverns:tavern",
+        "name": "Overworld Village Tavern & Inn",
+        "category": "Social Hub",
+        "desc": "Lively communal inn integrated directly into vanilla and CTOV villages, staffed by professional bartenders serving custom brewing recipes, hearty stews, and rare draughts.",
+        "cmd": "/locate structure minecraft:village_plains",
+        "img": "terralith_struct_valley_lodge.webp"
+    },
+    {
+        "id": "minecraft:stronghold",
+        "name": "Dungeons & Taverns Stronghold",
+        "category": "Epic Citadel",
+        "desc": "Monumental redesign replacing the cramped vanilla stronghold with an immense multi-story underground citadel, grand libraries, armories, and fortified portal chambers.",
+        "cmd": "/locate structure minecraft:stronghold",
+        "img": "terralith_struct_fortified_village.webp"
+    },
+    {
+        "id": "ctov:village_desert_oasis",
+        "name": "CTOV Desert Oasis Village",
+        "category": "ChoiceTheorem Village",
+        "desc": "Luxurious desert settlement clustered around lush palm springs with domed clay pavilions, water canals, and terrace markets.",
+        "cmd": "/locate structure ctov:village_desert_oasis",
+        "img": "terralith_struct_fortified_desert_village.webp"
+    },
+    {
+        "id": "ctov:village_mountain",
+        "name": "CTOV Alpine Mountain Village",
+        "category": "ChoiceTheorem Village",
+        "desc": "Steep terrace village built into cliff sides with winding stone staircases, timber ski lodges, and windbreaks overlooking panoramic valleys.",
+        "cmd": "/locate structure ctov:village_mountain",
+        "img": "terralith_struct_valley_lodge.webp"
+    },
+    {
+        "id": "ctov:village_dark_forest",
+        "name": "CTOV Dark Forest Village",
+        "category": "ChoiceTheorem Village",
+        "desc": "Gothic roofed woodland community nestled beneath towering dark oak canopies, illuminated by lanterns, braziers, and cobbled paths.",
+        "cmd": "/locate structure ctov:village_dark_forest",
+        "img": "terralith_struct_fortified_village.webp"
+    },
+    {
+        "id": "illagerstructures:illager_camp",
+        "name": "Illager Fortified Camp",
+        "category": "Illager Outpost",
+        "desc": "Heavily fortified raiding encampment equipped with wooden barricades, pillager canvas tents, training dummies, and stolen weapon racks.",
+        "cmd": "/locate structure illagerstructures:illager_camp",
+        "img": "terralith_struct_desert_outpost.webp"
+    },
+    {
+        "id": "illagerstructures:balloon_tower",
+        "name": "Illager Airship Balloon Tower",
+        "category": "Illager Outpost",
+        "desc": "Mooring dock and elevated surveillance platform for illager airborne reconnaissance units surveying the surrounding valleys.",
+        "cmd": "/locate structure illagerstructures:balloon_tower",
+        "img": "terralith_struct_spire.webp"
+    },
+    {
+        "id": "homesteads:forest_home_steads",
+        "name": "Homestead Wilderness Cottage",
+        "category": "Wilderness Settlement",
+        "desc": "Idyllic standalone homestead inhabited by specialized rural tradesfolk, herbalists, and solitary artisans practicing sustainable country crafts.",
+        "cmd": "/locate structure homesteads:forest_home_steads",
+        "img": "terralith_struct_valley_lodge.webp"
+    }
+]
+};
+    let currentWorldgenTab = 'terralith_biomes';
+
+    function switchWorldgenTab(tabKey, btn) {
+      playSound('click');
+      document.querySelectorAll('#worldgen .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentWorldgenTab = tabKey;
+      filterWorldgen();
+    }
+
+    function filterWorldgen() {
+      const q = document.getElementById('worldgen-search').value.toLowerCase().trim();
+      const container = document.getElementById('worldgen-cards-container');
+      container.innerHTML = '';
+
+      const list = worldgenData[currentWorldgenTab] || [];
+      const filtered = list.filter(item => {
+        if (!q) return true;
+        return item.name.toLowerCase().includes(q) ||
+               item.id.toLowerCase().includes(q) ||
+               item.category.toLowerCase().includes(q) ||
+               (item.dimension && item.dimension.toLowerCase().includes(q)) ||
+               item.desc.toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="color: #888899; padding: 32px; text-align: center; grid-column: 1 / -1; font-family: monospace; font-size: 14px;">No matching biomes or structures found.</div>';
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'mob-card';
+        const imgPath = 'assets/worldgen/' + item.img;
+        const dimBadge = item.dimension ? `<span class="danger-badge danger-low" style="font-size: 8px;">${item.dimension}</span>` : '';
+        card.innerHTML = `
+          <div class="worldgen-preview">
+            <img src="${imgPath}" alt="${item.name}" loading="lazy" onerror="this.src='assets/biomes/terralith_1.webp'">
+          </div>
+          <div class="worldgen-card-header">
+            <span class="mob-name">${item.name}</span>
+            <div class="worldgen-meta-row">
+              <span class="worldgen-category">${item.category}</span>
+              ${item.dimension ? `<span class="worldgen-dimension">${item.dimension}</span>` : ''}
+            </div>
+          </div>
+          <div class="mob-habitat">📍 ${item.id}</div>
+          <div class="mob-desc">${item.desc}</div>
+          <div class="command-box" onclick="copyCommand('${item.cmd}')" title="Click to copy command">
+            <span class="command-prompt">&gt;</span>
+            <span class="command-text">${item.cmd}</span>
+            <span class="command-copy-btn">COPY</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* Mod List */
+    const mods = [
+      {
+            "name": "Terralith",
+            "author": "Stardust Labs",
+            "icon": "assets/icons/terralith.png",
+            "link": "https://modrinth.com/mod/terralith",
+      "wiki": "https://www.stardustlabs.net/terralith"
+      },
+      {
+            "name": "Biomes O' Plenty",
+            "author": "Forstride, Adubbz",
+            "icon": "assets/icons/biomes-o-plenty.png",
+            "link": "https://modrinth.com/mod/biomes-o-plenty",
+      "wiki": "https://biomesoplenty.fandom.com/wiki/Biomes_O%27_Plenty_Wiki"
+      },
+      {
+            "name": "Moog's Mineshafts Reimagined",
+            "author": "FinnDog",
+            "icon": "assets/blocks/cobblestone.png",
+            "link": "https://modrinth.com/mod/moogs-mineshafts-reimagined"
+      },
+      {
+            "name": "Ocean Lily Pad Village",
+            "author": "Leonxkingx",
+            "icon": "assets/blocks/grass_block_top_tinted.png",
+            "link": "https://modrinth.com/mod/ocean-lily-pad-village"
+      },
+      {
+            "name": "Village Taverns",
+            "author": "Daedelus",
+            "icon": "assets/blocks/bookshelf.png",
+            "link": "https://modrinth.com/mod/village-taverns"
+      },
+      {
+            "name": "ChoiceTheorem's Overhauled Village",
+            "author": "ChoiceTheorem",
+            "icon": "assets/blocks/cobblestone.png",
+            "link": "https://modrinth.com/mod/ctov",
+      "wiki": "https://choicetheorem.github.io/CTOV-Doc/"
+      },
+      {
+            "name": "Dungeons & Taverns Stronghold",
+            "author": "NovaWostra",
+            "icon": "assets/blocks/deepslate_tiles.png",
+            "link": "https://modrinth.com/mod/dungeons-and-taverns-stronghold-overhaul",
+      "wiki": "https://github.com/Nova-Wostra/Dungeons-and-Taverns/wiki"
+      },
+      {
+            "name": "Illager Structures",
+            "author": "Jackie, TheGoldenWorld",
+            "icon": "assets/items/trial_key.png",
+            "link": "https://www.curseforge.com/minecraft/mc-mods/illager-structures",
+      "wiki": "https://www.curseforge.com/minecraft/mc-mods/illager-structures"
+      },
+      {
+            "name": "Homesteads",
+            "author": "Voxel Forge Studios",
+            "icon": "assets/mobs/homestead_beekeeper.webp",
+            "link": "https://modrinth.com/mod/homesteads"
+      },
+      {
+            "name": "Geophilic",
+            "author": "bebebea_loste",
+            "icon": "assets/blocks/grass_block_side_composite.png",
+            "link": "https://modrinth.com/mod/geophilic"
+      },
+      {
+            "name": "Streams Reflowing",
+            "author": "nicejohn",
+            "icon": "assets/items/heart_of_the_sea.png",
+            "link": "https://modrinth.com/mod/streams-reflowing"
+      },
+      {
+            "name": "Shippy Ships",
+            "author": "Caesius_Leo",
+            "icon": "assets/items/compass_16.png",
+            "link": "https://modrinth.com/mod/shippy-ships"
+      },
+      {
+            "name": "Farmer's Delight [Refabricated]",
+            "author": "Vectorwing, MehVahdJukaar",
+            "icon": "assets/items/fd_tomato.png",
+            "link": "https://modrinth.com/mod/farmers-delight-refabricated",
+      "wiki": "https://farmersdelight.fandom.com/wiki/Farmer%27s_Delight_Wiki"
+      },
+      {
+            "name": "Chef's Delight",
+            "author": "Redstone Games",
+            "icon": "assets/mobs/chef_villager.png",
+            "link": "https://modrinth.com/mod/chefs-delight",
+      "wiki": "https://github.com/Redstone-Games/Chefs-Delight/wiki"
+      },
+      {
+            "name": "My Nether's Delight",
+            "author": "rotgruengelb, SoyTutta",
+            "icon": "assets/items/fd_burger.png",
+            "link": "https://modrinth.com/mod/my-nethers-delight",
+      "wiki": "https://github.com/rotgruengelb/My-Nethers-Delight/wiki"
+      },
+      {
+            "name": "Creeper Overhaul",
+            "author": "Joosh, ThatGravyBoat",
+            "icon": "assets/icons/creeper-overhaul.png",
+            "link": "https://modrinth.com/mod/creeper-overhaul",
+      "wiki": "https://github.com/Team-Resourceful/Creeper-Overhaul/wiki"
+      },
+      {
+            "name": "Spider Overhaul",
+            "author": "Chybx",
+            "icon": "assets/icons/spider-overhaul.png",
+            "link": "https://modrinth.com/mod/spider-overhaul",
+      "wiki": "https://github.com/Chybx/Spider-Overhaul/wiki"
+      },
+      {
+            "name": "Enderman Overhaul",
+            "author": "AlexNijjar",
+            "icon": "assets/icons/enderman-overhaul.png",
+            "link": "https://modrinth.com/mod/enderman-overhaul",
+      "wiki": "https://github.com/Alex-Nijjar/Enderman-Overhaul/wiki"
+      },
+      {
+            "name": "Friends & Foes",
+            "author": "Faboslav",
+            "icon": "assets/icons/friends-and-foes.png",
+            "link": "https://modrinth.com/mod/friends-and-foes",
+      "wiki": "https://faboslav.gitbook.io/friends-and-foes/"
+      },
+      {
+            "name": "Modern Apple Cows",
+            "author": "CraisinLord",
+            "icon": "assets/mobs/apple_cow_logo.png",
+            "link": "https://modrinth.com/mod/modern-apple-cows"
+      },
+      {
+            "name": "Untitled Duck Mod",
+            "author": "Suel_ki, Okabintaro",
+            "icon": "assets/mobs/duck.webp",
+            "link": "https://modrinth.com/mod/untitled-duck-mod",
+      "wiki": "https://github.com/geckolib/untitled-duck-mod/wiki"
+      },
+      {
+            "name": "Ribbits Remastered",
+            "author": "Joosh, YUNGNICKYOUNG",
+            "icon": "assets/mobs/ribbits.webp",
+            "link": "https://modrinth.com/mod/ribbits"
+      },
+      {
+            "name": "Instant Feedback",
+            "author": "Drex",
+            "icon": "assets/mobs/muddy_pig_render.png",
+            "link": "https://github.com/DrexHD/InstantFeedback"
+      },
+      {
+            "name": "Connected Glass",
+            "author": "SuperMartijn642",
+            "icon": "assets/blocks/obsidian.png",
+            "link": "https://modrinth.com/mod/connected-glass"
+      },
+      {
+            "name": "Trade Cycling",
+            "author": "Max Henkel",
+            "icon": "assets/items/trial_key.png",
+            "link": "https://modrinth.com/mod/trade-cycling"
+      },
+      {
+            "name": "Right Click Harvest",
+            "author": "Jamalam",
+            "icon": "assets/items/fd_tomato.png",
+            "link": "https://modrinth.com/mod/right-click-harvest"
+      },
+      {
+            "name": "Ore Vein Miner",
+            "author": "quillphen",
+            "icon": "assets/items/diamond_sword.png",
+            "link": "https://modrinth.com/mod/ore-vein-miner"
+      },
+      {
+            "name": "Pick Up Notifier",
+            "author": "Fuzs",
+            "icon": "assets/items/totem_of_undying.png",
+            "link": "https://modrinth.com/mod/pick-up-notifier"
+      },
+      {
+            "name": "Mineable Spawners",
+            "author": "Jodek",
+            "icon": "assets/blocks/ancient_debris_side.png",
+            "link": "https://modrinth.com/mod/mineable-spawners"
+      },
+      {
+            "name": "Animal Feeding Trough",
+            "author": "Slexom",
+            "icon": "assets/blocks/crafting_table_top.png",
+            "link": "https://modrinth.com/mod/animal-feeding-trough"
+      },
+      {
+            "name": "Traveler's Backpack",
+            "author": "Tiviacz1337",
+            "icon": "assets/icons/travelersbackpack.png",
+            "link": "https://modrinth.com/mod/travelersbackpack",
+      "wiki": "https://tiviacz1337.github.io/travelers-backpack/"
+      },
+      {
+            "name": "Serene Seasons",
+            "author": "Adubbz, Forstride",
+            "icon": "assets/blocks/grass_block_top_tinted.png",
+            "link": "https://modrinth.com/mod/serene-seasons",
+      "wiki": "https://github.com/Glitchfiend/SereneSeasons/wiki"
+      },
+      {
+            "name": "Subtle Effects",
+            "author": "MincraftEinstein",
+            "icon": "assets/items/spyglass.png",
+            "link": "https://modrinth.com/mod/subtle-effects"
+      },
+      {
+            "name": "Presence Footsteps",
+            "author": "Hurricaaane, Sollace",
+            "icon": "assets/items/elytra.png",
+            "link": "https://modrinth.com/mod/presence-footsteps",
+      "wiki": "https://github.com/Sollace/Presence-Footsteps/wiki"
+      },
+      {
+            "name": "Macaw's Bridges",
+            "author": "SketchMacaw",
+            "icon": "assets/blocks/deepslate_tiles.png",
+            "link": "https://modrinth.com/mod/macaws-bridges",
+      "wiki": "https://github.com/sketch-macaw/Macaws-Bridges/wiki"
+      },
+      {
+            "name": "Do a Barrel Roll",
+            "author": "enjarai",
+            "icon": "assets/items/elytra.png",
+            "link": "https://modrinth.com/mod/do-a-barrel-roll",
+      "wiki": "https://github.com/EnnuiL/do-a-barrel-roll/wiki"
+      },
+      {
+            "name": "Gravestones",
+            "author": "Pneumono",
+            "icon": "assets/items/totem_of_undying.png",
+            "link": "https://modrinth.com/mod/gravestones",
+      "wiki": "https://github.com/henkelmax/gravestone-mod/wiki"
+      },
+      {
+            "name": "Exposure (Camera)",
+            "author": "mortuusars",
+            "icon": "assets/items/compass_16.png",
+            "link": "https://modrinth.com/mod/exposure",
+      "wiki": "https://github.com/mortuusars/exposure/wiki"
+      },
+      {
+            "name": "Just Enough Items (JEI)",
+            "author": "mezz",
+            "icon": "assets/blocks/crafting_table_top.png",
+            "link": "https://modrinth.com/mod/jei",
+      "wiki": "https://github.com/mezz/JustEnoughItems/wiki"
+      },
+      {
+            "name": "AppleSkin",
+            "author": "squeek502",
+            "icon": "assets/items/fd_burger.png",
+            "link": "https://modrinth.com/mod/appleskin",
+      "wiki": "https://github.com/squeek502/AppleSkin/wiki"
+      },
+      {
+            "name": "Better Advancements",
+            "author": "way2muchnoise",
+            "icon": "assets/items/trial_key.png",
+            "link": "https://modrinth.com/mod/better-advancements"
+      },
+      {
+            "name": "Diorama",
+            "author": "Dara Adedeji",
+            "icon": "assets/items/heart_of_the_sea.png",
+            "link": "https://modrinth.com/mod/diorama"
+      },
+      {
+            "name": "Physics Mod",
+            "author": "Haubna",
+            "icon": "assets/blocks/stone.png",
+            "link": "https://minecraftphysicsmod.com",
+      "wiki": "https://physicsmod.com/"
+      },
+      {
+            "name": "Sodium",
+            "author": "JellySquid",
+            "icon": "assets/blocks/obsidian.png",
+            "link": "https://modrinth.com/mod/sodium",
+      "wiki": "https://github.com/CaffeineMC/sodium-fabric/wiki"
+      },
+      {
+            "name": "Nvidium",
+            "author": "Cortex",
+            "icon": "assets/items/heart_of_the_sea.png",
+            "link": "https://modrinth.com/mod/nvidium",
+      "wiki": "https://github.com/meow-j/nvidium/wiki"
+      },
+      {
+            "name": "Lithium",
+            "author": "JellySquid, 2No2Name",
+            "icon": "assets/blocks/stone.png",
+            "link": "https://modrinth.com/mod/lithium",
+      "wiki": "https://github.com/CaffeineMC/lithium-fabric/wiki"
+      },
+      {
+            "name": "Iris Shaders",
+            "author": "coderbot, IMS",
+            "icon": "assets/items/spyglass.png",
+            "link": "https://modrinth.com/mod/iris",
+      "wiki": "https://github.com/IrisShaders/Iris/wiki"
+      },
+      {
+            "name": "Amplified Nether",
+            "author": "Starmute",
+            "icon": "assets/blocks/bedrock.png",
+            "link": "https://modrinth.com/mod/amplified-nether",
+      "wiki": "https://www.stardustlabs.net/amplified-nether"
+      },
+      {
+            "name": "BetterNether",
+            "author": "Quiqueck, Paulevs",
+            "icon": "assets/blocks/ancient_debris_side.png",
+            "link": "https://modrinth.com/mod/betternether",
+      "wiki": "https://better-nether.fandom.com/wiki/BetterNether_Wiki"
+      },
+      {
+            "name": "forfun_advancements",
+            "author": "MONO_BAKA & Antigravity",
+            "icon": "assets/items/netherite_chestplate.png",
+            "link": "#"
+      }
+];
+
+    function renderModList(items) {
+      const c = document.getElementById('mod-list-container');
+      c.innerHTML = '';
+      items.forEach(m => {
+        const d = document.createElement('div');
+        d.className = 'mod-item';
+
+        let linksHtml = '';
+        if (m.wiki && m.link && m.link !== '#') {
+          linksHtml = `
+            <div class="mod-item-links">
+              <a href="${m.wiki}" target="_blank" rel="noopener noreferrer" class="mod-item-link wiki-link" onclick="playSound('click')" title="Official Wiki & Guide">📖 Wiki ↗</a>
+              <a href="${m.link}" target="_blank" rel="noopener noreferrer" class="mod-item-link source-link" onclick="playSound('click')" title="Modrinth / Source Project">📦 Source ↗</a>
+            </div>
+          `;
+        } else if (m.link && m.link !== '#') {
+          linksHtml = `
+            <div class="mod-item-links">
+              <a href="${m.link}" target="_blank" rel="noopener noreferrer" class="mod-item-link source-link" onclick="playSound('click')" title="Modrinth / Source Project">📦 Source ↗</a>
+            </div>
+          `;
+        } else {
+          linksHtml = '<div class="mod-item-links"><span style="color:#888899; font-size:8px; font-family:var(--font-pixel);">Custom Companion Mod</span></div>';
+        }
+
+        d.innerHTML = `
+          <div class="mod-item-top">
+            <div class="mod-icon-frame">
+              <img src="${m.icon}" alt="${m.name}">
+            </div>
+            <div>
+              <div class="mod-item-name"><strong>${m.name}</strong></div>
+              <div class="mod-item-author">by ${m.author}</div>
+            </div>
+          </div>
+          ${linksHtml}
+        `;
+        c.appendChild(d);
+      });
+    }
+
+    function filterModList() {
+      const q = document.getElementById('mod-search').value.toLowerCase();
+      const filtered = mods.filter(m => m.name.toLowerCase().includes(q) || m.author.toLowerCase().includes(q));
+      renderModList(filtered);
+    }
+
+    /* Drifting Clouds Canvas */
+    const canvas = document.getElementById('sky-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const clouds = [
+      { x: 50, y: 70, speed: 0.25, size: 45 },
+      { x: 340, y: 160, speed: 0.18, size: 65 },
+      { x: 750, y: 110, speed: 0.35, size: 55 },
+      { x: 1100, y: 200, speed: 0.22, size: 50 }
+    ];
+
+    function drawPixelCloud(cx, cy, scale) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.035)';
+      ctx.fillRect(cx, cy, scale * 3, scale);
+      ctx.fillRect(cx + scale * 0.5, cy - scale * 0.5, scale * 2, scale * 1.5);
+    }
+
+    function animateSky() {
+      ctx.clearRect(0, 0, width, height);
+      clouds.forEach(c => {
+        c.x += c.speed;
+        if (c.x > width + 250) c.x = -250;
+        drawPixelCloud(c.x, c.y, c.size);
+      });
+      requestAnimationFrame(animateSky);
+    }
+    animateSky();
+
+    /* Randomized Splash Text */
+    const splashes = [
+      "Now with all 66 modded creature renders!",
+      "Terralith & BOP approved!",
+      "Curated for true explorers!",
+      "No 40-block cliff stilts!",
+      "Powered by Sodium & Nvidium!",
+      "Corrupted Shield included!",
+      "Freshly baked Farmer's Delight!"
+    ];
+    document.getElementById('random-splash').innerText = splashes[Math.floor(Math.random() * splashes.length)];
+
+    // Initialize initial render
+    filterMobs('creepers', document.querySelector('.tab-btn'));
+    filterWorldgen();
+    renderModList(mods);
+  </script>
+</body>
+</html>
